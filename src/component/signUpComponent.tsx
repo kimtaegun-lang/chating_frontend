@@ -108,7 +108,7 @@ const SignUpComponent = () => {
         signUp(userData)
             .then((res) => {
                 alert(res.data);
-                navigate('/signIn');
+                navigate('../signIn');
             })
             .catch((err) => {
                 alert(err.response.data.message);

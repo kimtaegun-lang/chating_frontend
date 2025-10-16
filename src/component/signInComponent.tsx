@@ -49,11 +49,13 @@ const SignInComponent = () => {
 
         signIn(userData)
         .then((res) => {
-            alert(res.data);
+            alert(res.data.message);
+            localStorage.setItem('accessToken', res.data.token);
             navigate('/');
         })
         .catch((err) => {
-           alert(err.response.data.message);
+            console.log(err.response.data);
+           alert(err.response.data);
         });
         setError({});
     };
