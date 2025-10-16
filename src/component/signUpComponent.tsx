@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { userInfo, errors } from "./index";
-import { signUp } from "../api/memberApi";
+import { signUp } from "../api/MemberApi";
 import { useNavigate } from "react-router-dom";
 const SignUpComponent = () => {
     const [userData, setUserData] = useState<userInfo>({

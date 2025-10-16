@@ -1,5 +1,5 @@
 import axios from "axios";
-import { serverPort } from "./rootApi";
+import { serverPort } from "./RootApi";
 import { userInfo,signInData } from "../component";
 const member = `${serverPort}/member`;
 

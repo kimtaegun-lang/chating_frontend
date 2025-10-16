@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { signInData } from "./index";
 import { useNavigate } from "react-router-dom";
-import { signIn } from "../api/memberApi";
+import { signIn } from "../api/MemberApi";
 
 const SignInComponent = () => {
     const [userData, setUserData] = useState<signInData>({

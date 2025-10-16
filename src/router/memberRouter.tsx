@@ -1,8 +1,8 @@
 import {lazy,Suspense} from "react";
-const SignInPage =lazy(()=>import("../pages/signInPage"));
-const SignUpPage=lazy(()=>import("../pages/signUpPage"));
-const Loading=lazy(()=>import("../common/loading"));
-const memberRouter = () => {
+const SignInPage =lazy(()=>import("../pages/SignInPage"));
+const SignUpPage=lazy(()=>import("../pages/SignUpPage"));
+const Loading=lazy(()=>import("../common/Loading"));
+const MemberRouter = () => {
    return [
         {
             path:"signIn",
@@ -14,4 +14,4 @@ const memberRouter = () => {
         }
     ]
 }
-export default memberRouter
+export default MemberRouter;

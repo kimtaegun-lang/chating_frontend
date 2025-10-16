@@ -1,4 +1,4 @@
-import SignInComponent from "../component/signInComponent";
+import SignInComponent from "../component/SignInComponent";
 const signInPage =() => {
     return (
         <>
