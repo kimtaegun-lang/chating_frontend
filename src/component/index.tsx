@@ -18,8 +18,9 @@ export interface signInData { // 로그인 데이터
     pwd: string;
 }
 
-export interface message { // 채팅 메시지 객체
-    sender: string;
-    receiver: string;
-    content: string;
+export interface message {  // 채팅 메시지 객체
+    sender: string;      
+    receiver: string;   
+    content: string;     
+    createdAt: string; 
 }

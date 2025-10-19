@@ -1,11 +1,11 @@
 import {lazy,Suspense} from "react";
-const ChatPage =lazy(()=>import("../pages/ChatPage"));
+const ChatRoomPage =lazy(()=>import("../pages/ChatRoomPage"));
 const Loading=lazy(()=>import("../common/Loading"));
 const ChatRouter = () => {
    return [
         {
             path:"room",
-            element:<Suspense fallback={<Loading />}><ChatPage/></Suspense>
+            element:<Suspense fallback={<Loading />}><ChatRoomPage/></Suspense>
         }
     ]
 }

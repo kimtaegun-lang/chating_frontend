@@ -48,15 +48,19 @@ const SignInComponent = () => {
         }
 
         signIn(userData)
-        .then((res) => {
-            alert(res.data.message);
-            localStorage.setItem('accessToken', res.data.token);
-            navigate('/');
-        })
-        .catch((err) => {
-            console.log(err.response.data);
-           alert(err.response.data);
-        });
+            .then((res) => {
+                alert(res.data.message);
+                console.log(res.data.tokens);
+                localStorage.setItem('accessToken', res.data.tokens.accessToken);
+                localStorage.setItem('refreshToken', res.data.tokens.refreshToken);
+                localStorage.setItem('memId', res.data.tokens.memId);
+                localStorage.setItem('name', res.data.tokens.name);
+                navigate('/');
+            })
+            .catch((err) => {
+                console.log(err.response.data);
+                alert(err.response.data);
+            });
         setError({});
     };
 
