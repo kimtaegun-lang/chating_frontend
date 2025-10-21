@@ -24,3 +24,9 @@ export interface message {  // 채팅 메시지 객체
     content: string;     
     createdAt: string; 
 }
+
+export interface chatRoom { // 채팅방
+    roomId: number;
+    receiver: string;
+    createdAt: string;
+}
