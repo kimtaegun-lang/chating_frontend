@@ -6,7 +6,6 @@ import { chatRoom } from '../component';
 const ChatListComponent = () => {
     const [chatRooms, setChatRooms] = useState<chatRoom[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const navigate = useNavigate();
     const loginUserId = localStorage.getItem('memId') || '';
 
@@ -17,12 +16,12 @@ const ChatListComponent = () => {
     const fetchChatRooms = async () => {
         getMyChatRooms(loginUserId)
             .then((response) => {
-                setChatRooms(response.data);
+                console.log(response.data.message);
+                setChatRooms(response.data.data);
                 setLoading(false);
             })
             .catch((err) => {
-                console.error('채팅방 목록 조회 실패:', err);
-                setError('채팅방 목록을 불러오는데 실패했습니다.');
+                alert(err.response.data);
                 setLoading(false);
             });
     };
@@ -35,13 +34,6 @@ const ChatListComponent = () => {
         return <div style={{ padding: '20px', textAlign: 'center' }}>로딩 중...</div>;
     }
 
-    if (error) {
-        return (
-            <div style={{ padding: '20px', color: 'red', textAlign: 'center' }}>
-                {error}
-            </div>
-        );
-    }
 
     return (
         <div style={{

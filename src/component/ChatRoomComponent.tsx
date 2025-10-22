@@ -1,7 +1,7 @@
 import { message } from "./index";
 import { useEffect, useState, useRef } from "react";
 import { connect, subscribe, sendMessage, disconnect, getConversation } from "../api/ChatApi";
-
+import { useNavigate } from "react-router-dom";
 const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: string }) => {
     const [messages, setMessages] = useState<message[]>([]);
     const [input, setInput] = useState('');
@@ -12,7 +12,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     const messageEndRef = useRef<HTMLDivElement | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const prevScrollHeightRef = useRef<number>(0);
-
+    const navigate = useNavigate();
     const scrollToBottom = () => {
         messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
@@ -31,16 +31,21 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
 
     // 최초 로딩 시 스크롤 하단으로
     useEffect(() => {
-        getConversation(loginUserId, receiver, 10, chatId).then(response => {
-            setMessages(response.data.content.reverse()); // 역순 뒤집기
-            setChatId(response.data.currentPage);
-            console.log(response.data);
-            console.log(response.data.currentPage);
-            
+            if (!loginUserId) {
+            alert('로그인이 필요합니다.');
+            navigate('../member/signIn');
+            return;
+        }
+
+        getConversation(loginUserId, receiver, 10, chatId,roomId).then(response => {
+            setMessages(response.data.data.content.reverse()); // 역순 뒤집기
+            setChatId(response.data.data.currentPage);
+            console.log(response.data.message); 
             // 최초 로딩 후 스크롤 하단으로
             setTimeout(() => scrollToBottom(), 100);
         }).catch(error => {
-            alert(error);
+            alert(error.response.data);
+            navigate(-1);
         });
 
         setConnected(true);
@@ -74,7 +79,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
             setIsLoading(true);
             prevScrollHeightRef.current = container.scrollHeight;
 
-            getConversation(loginUserId, receiver, 10, chatId).then(response => {
+            getConversation(loginUserId, receiver, 10, chatId,roomId).then(response => {
                 const newMessages = response.data.content.reverse(); // 역순 뒤집기
                 const newChatId = response.data.currentPage;
                 
