@@ -2,7 +2,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { serverPort } from '../api/RootApi';
 import { api } from './RootApi';
-import { chatRoom } from '../component';
+import { StompSubscription } from '@stomp/stompjs';
 let stompClient: Client | null = null;
 const chat = `${serverPort}/api/chat`;
 
@@ -33,9 +33,6 @@ export const connect = (onConnect: () => void) => {
 };
 
 export const subscribe = (loginId: string, roomId: number, onMessage: (message: any) => void) => {
-    console.log("=== subscribe 호출 ===");
-    console.log("loginId:", loginId);
-    console.log("roomId:", roomId);
     
     if (!stompClient?.connected) {
         console.error("stompClient가 연결되지 않음");
@@ -43,16 +40,13 @@ export const subscribe = (loginId: string, roomId: number, onMessage: (message: 
         return;
     }
     
-    // ✅ 채팅방별 queue 구독
+    // 채팅방별 queue 구독
     const path = `/queue/chatroom-${roomId}`;
-    console.log("구독 경로:", path);
     
     try {
         const subscription = stompClient.subscribe(
             path,
             (msg: any) => {
-                console.log("=== 메시지 도착 ===");
-                console.log("Raw 메시지:", msg);
                 
                 try {
                     const message = JSON.parse(msg.body);
@@ -66,8 +60,6 @@ export const subscribe = (loginId: string, roomId: number, onMessage: (message: 
                 'id': `sub-${loginId}-${roomId}`
             }
         );
-        
-        console.log("구독 성공");
         return subscription;
     } catch (e) {
         console.error("구독 중 예외 발생:", e);
@@ -79,11 +71,7 @@ export const sendMessage = (receiver: string, content: string,roomId:number) => 
         console.warn('STOMP 클라이언트가 연결되지 않았습니다.');
         return;
     }
-    
-    console.log("=== 메시지 전송 ===");
-    console.log("Receiver:", receiver);
-    console.log("Content:", content);
-    
+    console.log(receiver, content,roomId);
     stompClient.publish({
         destination: '/app/send',
         body: JSON.stringify({
@@ -92,8 +80,6 @@ export const sendMessage = (receiver: string, content: string,roomId:number) => 
             roomId:roomId
         })
     });
-    
-    console.log('메시지 전송 완료');
 };
 
 export const disconnect = () => {
@@ -112,24 +98,62 @@ export const getMyChatRooms = async(userId: string)=>{
 };
 
 // 채팅 내역 조회
-export const getConversation = async(user1: string, user2: string, limit: number, chatId: number) => {
+export const getConversation = async(user1: string, user2: string, limit: number, chatId: number,roomId:number) => {
     console.log(user1, user2, limit, chatId);
     const response = await api.post(`${chat}/getConversation`, {
         user1,
         user2,
         limit,
-        chatId
+        chatId,
+        roomId
     });
     return response;
 };
 
 
-// 채팅방 생성 또는 조회
-export const getOrCreateChatRoom = (sender: string, receiver: string)=> {
-    return api.get(`/api/chatroom?sender=${sender}&receiver=${receiver}`)
-        .then(response => response.data)
-        .catch(error => {
-            console.error('채팅방 생성/조회 실패:', error);
-            throw error;
-        });
+// 채팅방 생성 
+export const createChatRoom = (sender: string, receiver: string)=> {
+    const response= api.post(`/api/chat/createRoom`, { sender, receiver })
+    return response;
+};
+
+
+// 랜덤 매칭 요청
+export const requestRandomMatch = (userId: string, onMatch: (data: any) => void): StompSubscription | null => {
+    if (!stompClient || !stompClient.connected) {
+        console.warn('STOMP 클라이언트가 연결되지 않았습니다.');
+        return null;
+    }
+    
+    // 1. 먼저 매칭 결과 구독
+    const subscription = stompClient.subscribe(
+        `/queue/match-${userId}`,
+        (msg: any) => {   
+            try {
+                const data = JSON.parse(msg.body);     
+                onMatch(data);
+            } catch (error) {
+                console.error('메시지 파싱 오류:', error);
+            }
+        }
+    );
+    
+    // 2. 구독 완료 후 매칭 요청
+    setTimeout(() => {
+        if (stompClient && stompClient.connected) {
+            stompClient.publish({
+                destination: '/app/random/match',
+                body: JSON.stringify({ userId })
+            });
+            console.log('매칭 요청 전송 완료');
+        }
+    }, 100);
+    
+    return subscription;
+};
+
+// 매칭 취소
+export const cancelRandomMatch = async (userId: string) => {
+    const response = await api.post('/api/random/cancel', { userId });
+    return response;
 };
