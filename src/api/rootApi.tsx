@@ -21,7 +21,12 @@ api.interceptors.response.use(
     async (error: AxiosError) => {
         const originalRequest = error.config as any;
         
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        const errorData = error.response?.data as { error?: string; message?: string };
+        
+        if (error.response?.status === 401 && 
+            errorData?.error === 'TOKEN_EXPIRED' &&
+            !originalRequest._retry) {
+            
             originalRequest._retry = true;
             
             const refreshToken = localStorage.getItem('refreshToken');
@@ -29,7 +34,7 @@ api.interceptors.response.use(
             if (!refreshToken) {
                 console.log("Refresh Token 없음");
                 localStorage.clear();
-                window.location.href = '/login';
+                window.location.href = '../member/signIn';
                 return Promise.reject(error);
             }
 
