@@ -1,10 +1,15 @@
-const Loading = () => { // 서버로딩시 보여질 화면
+const Loading = () => {
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-            <div className="p-5 bg-white rounded-lg text-center">
-                <div className="text-2xl font-semibold">로딩 중...</div>
+        <div className="loading-overlay">
+            <div className="loading-content">
+                <div className="spinner-container">
+                    <div className="spinner"></div>
+                    <div className="spinner-inner"></div>
+                </div>
+                <p className="loading-text">로딩 중...</p>
             </div>
         </div>
     );
 };
+
 export default Loading;

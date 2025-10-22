@@ -50,15 +50,13 @@ const SignInComponent = () => {
         signIn(userData)
             .then((res) => {
                 alert(res.data.message);
-                console.log(res.data.tokens);
-                localStorage.setItem('accessToken', res.data.tokens.accessToken);
-                localStorage.setItem('refreshToken', res.data.tokens.refreshToken);
-                localStorage.setItem('memId', res.data.tokens.memId);
-                localStorage.setItem('name', res.data.tokens.name);
-                navigate('/');
+                localStorage.setItem('accessToken', res.data.data.accessToken);
+               localStorage.setItem('refreshToken', res.data.data.refreshToken);
+               localStorage.setItem('memId', res.data.data.memId);
+             localStorage.setItem('name', res.data.data.name);
+             navigate('/');
             })
             .catch((err) => {
-                console.log(err.response.data);
                 alert(err.response.data);
             });
         setError({});
