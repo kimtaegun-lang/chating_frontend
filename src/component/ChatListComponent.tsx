@@ -25,7 +25,7 @@ const ChatListComponent = () => {
                 setLoading(false);
             });
     };
-
+//
     const handleChatRoomClick = (roomId: number, receiver: string) => {
         navigate(`../room/${roomId}/${receiver}`);
     };
