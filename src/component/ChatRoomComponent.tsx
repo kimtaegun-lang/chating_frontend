@@ -1,7 +1,8 @@
 import { message } from "./index";
 import { useEffect, useState, useRef } from "react";
-import { connect, subscribe, sendMessage, disconnect, getConversation } from "../api/ChatApi";
+import { connect, subscribe, sendMessage, disconnect, getConversation,  deleteMessage  } from "../api/ChatApi";
 import { useNavigate } from "react-router-dom";
+
 const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: string }) => {
     const [messages, setMessages] = useState<message[]>([]);
     const [input, setInput] = useState('');
@@ -13,50 +14,76 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const prevScrollHeightRef = useRef<number>(0);
     const navigate = useNavigate();
+
     const scrollToBottom = () => {
         messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
     // 날짜/시간 포맷팅 함수
     const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = String(date.getFullYear()).slice(2);
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    
-    return `${year}/${month}/${day} ${hours}:${minutes}`;
-};
+        const date = new Date(dateString);
+        const year = String(date.getFullYear()).slice(2);
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${year}/${month}/${day} ${hours}:${minutes}`;
+    };
+
+    // 채팅 삭제 핸들러
+    const handleDelete = async (msgChatId: number) => {
+        if (window.confirm('채팅을 삭제하시겠습니까?')) {
+            try {
+                deleteMessage (roomId,msgChatId);
+                setMessages(prev => prev.filter(msg => msg.chatId !== msgChatId));
+            } catch (error) {
+                console.error('채팅 삭제 실패:', error);
+                alert('채팅 삭제에 실패했습니다.');
+            }
+        }
+    };
+
+        const handleSend = async() => {
+        if (input.trim()) {
+            sendMessage(loginUserId,receiver, input, roomId);
+            setInput('');
+        }
+    };
 
     // 최초 로딩 시 스크롤 하단으로
     useEffect(() => {
-            if (!loginUserId) {
+        if (!loginUserId) {
             alert('로그인이 필요합니다.');
             navigate('../member/signIn');
             return;
         }
 
-        getConversation(loginUserId, receiver, 10, chatId,roomId).then(response => {
-            setMessages(response.data.data.content.reverse()); // 역순 뒤집기
+        setConnected(true);
+
+        connect(() => {
+            subscribe(loginUserId, roomId, (newMessage) => {
+                
+                // 삭제 타입 메시지인 경우
+                if (newMessage.type === 'DELETE') {
+                    setMessages(prev => prev.filter(msg => msg.chatId !== newMessage.chatId));
+                    return;
+                }
+                
+                // 일반 메시지인 경우
+                if (newMessage.sender !== loginUserId||newMessage.type==='CREATE') {
+                    setMessages(prev => [...prev, newMessage]);
+                }
+            });
+
+            getConversation(loginUserId, receiver, 10, chatId, roomId).then(response => {
+            setMessages(response.data.data.content.reverse());
             setChatId(response.data.data.currentPage);
-            console.log(response.data.message); 
-            // 최초 로딩 후 스크롤 하단으로
             setTimeout(() => scrollToBottom(), 100);
         }).catch(error => {
             alert(error.response.data);
             navigate(-1);
         });
-
-        setConnected(true);
-
-        connect(() => {
-            subscribe(loginUserId, roomId, (newMessage) => {
-                console.log('Received message:', newMessage);
-                if (newMessage.sender !== loginUserId) {
-                    setMessages(prev => [...prev, newMessage]);
-                }
-            });
         });
 
         return () => {
@@ -74,19 +101,17 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
         const container = scrollContainerRef.current;
         if (!container || isLoading || chatId === 0) return;
 
-        // 스크롤이 최상단에 도달했을 때
         if (container.scrollTop === 0) {
             setIsLoading(true);
             prevScrollHeightRef.current = container.scrollHeight;
 
-            getConversation(loginUserId, receiver, 10, chatId,roomId).then(response => {
-                const newMessages = response.data.content.reverse(); // 역순 뒤집기
-                const newChatId = response.data.currentPage;
+            getConversation(loginUserId, receiver, 10, chatId, roomId).then(response => {
+                const newMessages = response.data.data.content.reverse();
+                const newChatId = response.data.data.currentPage;
                 
                 setMessages(prev => [...newMessages, ...prev]);
                 setChatId(newChatId);
                 
-                // 스크롤 위치 유지
                 setTimeout(() => {
                     if (container) {
                         const newScrollHeight = container.scrollHeight;
@@ -101,20 +126,6 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
         }
     };
 
-    const handleSend = () => {
-        if (input.trim()) {
-            const newMsg: message = {
-                content: input,
-                sender: loginUserId,
-                receiver: receiver,
-                createdAt: new Date().toISOString()
-            };
-
-            setMessages(prev => [...prev, newMsg]);
-            sendMessage(receiver, input, roomId);
-            setInput('');
-        }
-    };
 
     return (
         <div style={{
@@ -156,7 +167,8 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                             style={{
                                 display: 'flex',
                                 justifyContent: isMine ? 'flex-start' : 'flex-end',
-                                marginBottom: '10px'
+                                marginBottom: '10px',
+                                alignItems: 'flex-start'
                             }}
                         >
                             <div style={{
@@ -168,7 +180,8 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                                 boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
                                 wordBreak: 'break-word',
                                 fontSize: '14px',
-                                lineHeight: '1.4'
+                                lineHeight: '1.4',
+                                position: 'relative'
                             }}>
                                 {msg.content}
                                 <div style={{
@@ -180,8 +193,34 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                                     {formatDateTime(msg.createdAt)}
                                 </div>
                             </div>
+                            
+                            {isMine && msg.chatId && (
+                                <button
+                                    onClick={() => handleDelete(msg.chatId!)}
+                                    style={{
+                                        marginLeft: '8px',
+                                        width: '20px',
+                                        height: '20px',
+                                        borderRadius: '50%',
+                                        border: 'none',
+                                        backgroundColor: '#ff4444',
+                                        color: 'white',
+                                        cursor: 'pointer',
+                                        fontSize: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        flexShrink: 0,
+                                        padding: 0,
+                                        lineHeight: 1
+                                    }}
+                                    title="삭제"
+                                >
+                                    ×
+                                </button>
+                            )}
                         </div>
-                    )
+                    );
                 })}
                 <div ref={messageEndRef} />
             </div>
@@ -224,3 +263,4 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
 };
 
 export default ChatRoomComponent;
+

@@ -22,7 +22,9 @@ export interface message {  // 채팅 메시지 객체
     sender: string;      
     receiver: string;   
     content: string;     
-    createdAt: string; 
+    createdAt: string;
+  chatId?: number ;
+    type?: string;
 }
 
 export interface chatRoom { // 채팅방
