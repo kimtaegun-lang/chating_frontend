@@ -122,14 +122,6 @@ export const getConversation = async(user1: string, user2: string, limit: number
     return response;
 };
 
-
-// 채팅방 생성 
-export const createChatRoom = (sender: string, receiver: string)=> {
-    const response= api.post(`/api/chat/createRoom`, { sender, receiver })
-    return response;
-};
-
-
 // 랜덤 매칭 요청
 export const requestRandomMatch = (userId: string, onMatch: (data: any) => void): StompSubscription | null => {
     if (!stompClient || !stompClient.connected) {
@@ -166,6 +158,6 @@ export const requestRandomMatch = (userId: string, onMatch: (data: any) => void)
 
 // 매칭 취소
 export const cancelRandomMatch = async (userId: string) => {
-    const response = await api.post('/api/random/cancel', { userId });
+    const response = await api.post(`api/random/cancel`, { userId });
     return response;
 };
