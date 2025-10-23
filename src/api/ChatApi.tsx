@@ -1,6 +1,6 @@
 import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { serverPort } from '../api/RootApi';
+import { serverPort } from './RootApi';
 import { api } from './RootApi';
 import { StompSubscription } from '@stomp/stompjs';
 let stompClient: Client | null = null;
@@ -41,16 +41,14 @@ export const subscribe = (loginId: string, roomId: number, onMessage: (message: 
     }
     
     // 채팅방별 queue 구독
-    const path = `/queue/chatroom-${roomId}`;
+    const path = `/topic/chatroom-${roomId}`;
     
     try {
         const subscription = stompClient.subscribe(
             path,
             (msg: any) => {
-                
                 try {
                     const message = JSON.parse(msg.body);
-                    console.log("파싱된 메시지:", message);
                     onMessage(message);
                 } catch (parseError) {
                     console.error("JSON 파싱 오류:", parseError);
@@ -66,18 +64,32 @@ export const subscribe = (loginId: string, roomId: number, onMessage: (message: 
         return null;
     }
 };
-export const sendMessage = (receiver: string, content: string,roomId:number) => {
+export const sendMessage = (sender:string,receiver: string, content: string,roomId:number) => {
     if (!stompClient || !stompClient.connected) {
         console.warn('STOMP 클라이언트가 연결되지 않았습니다.');
         return;
     }
-    console.log(receiver, content,roomId);
     stompClient.publish({
         destination: '/app/send',
         body: JSON.stringify({
+            sender:sender,
             receiver: receiver,
             content: content,
             roomId:roomId
+        })
+    });
+};
+
+export const deleteMessage = (roomId:number,chatId:number) => {
+    if (!stompClient || !stompClient.connected) {
+        console.warn('STOMP 클라이언트가 연결되지 않았습니다.');
+        return;
+    }
+    stompClient.publish({
+        destination: '/app/delete',
+        body: JSON.stringify({
+            roomId:roomId,
+            chatId:chatId
         })
     });
 };
