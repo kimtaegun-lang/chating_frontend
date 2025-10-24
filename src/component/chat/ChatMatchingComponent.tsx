@@ -6,6 +6,7 @@ import '../../css/ChatMatching.css';
 
 const ChatMatchingComponent = () => {
     const [isMatching, setIsMatching] = useState(false);
+    const isMatchingRef = useRef(false);
     const [message, setMessage] = useState('');
     const navigate = useNavigate();
     const loginUserId = localStorage.getItem('memId') || "";
@@ -21,10 +22,13 @@ const ChatMatchingComponent = () => {
         
         // 컴포넌트 언마운트 시 정리
         return () => {
+            console.log("호출됨1");
             if (subscriptionRef.current) {
+                 console.log("구독취소");
                 subscriptionRef.current.unsubscribe();
             }
-            if (isMatching) {
+            if (isMatchingRef.current) {
+                console.log("넌 취소가 되어야해");
                 cancelRandomMatch(loginUserId).catch(console.error);
             }
             disconnect();
@@ -39,6 +43,7 @@ const ChatMatchingComponent = () => {
         }
 
         setIsMatching(true);
+         isMatchingRef.current = true; 
         setMessage('서버 연결 중...');
 
         console.log("=== ChatMatchingComponent: 매칭 시작전 ===");
