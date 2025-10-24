@@ -6,7 +6,7 @@ import AdminRouter from "./AdminRouter";
 const Loading=lazy(()=>import("../common/Loading"));
 const Main=lazy(()=>import("../pages/MainPage"));
 
-const root =createBrowserRouter([
+const Root =createBrowserRouter([
     {
         path:"/",
         element:<Suspense fallback={<Loading/>}><Main /></Suspense>
@@ -24,4 +24,4 @@ const root =createBrowserRouter([
         children:AdminRouter()
     }
 ])
-export default root;
+export default Root;
