@@ -1,7 +1,6 @@
-// src/component/MemberDetailComponent.tsx
 import { useEffect, useState } from "react";
-import { getMemberDetail } from "../api/AdminApi";
-import "../MemberList.css";
+import { getMemberDetail } from "../../api/AdminApi";
+import '../../css/MemberList.css';
 
 const MemberDetailComponent = ({ memberId }: { memberId: string }) => {
   const [member, setMember] = useState<any>(null);

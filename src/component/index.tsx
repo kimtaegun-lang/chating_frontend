@@ -9,10 +9,6 @@ export interface userInfo { // 회원 정보 객체
     birth: string,
 }
 
-export interface errors { // 에러 메시지 객체
-    [key:string]: string
-}
-
 export interface signInData { // 로그인 데이터
     memId: string;
     pwd: string;

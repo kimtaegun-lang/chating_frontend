@@ -1,7 +1,8 @@
-import { message } from "./index";
+import { message } from '..';
 import { useEffect, useState, useRef } from "react";
-import { connect, subscribe, sendMessage, disconnect, getConversation,  deleteMessage  } from "../api/ChatApi";
+import { connect, subscribe, sendMessage, disconnect, getConversation, deleteMessage } from '../../api/ChatApi';
 import { useNavigate } from "react-router-dom";
+import '../../css/ChatRoom.css';
 
 const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: string }) => {
     const [messages, setMessages] = useState<message[]>([]);
@@ -35,7 +36,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     const handleDelete = async (msgChatId: number) => {
         if (window.confirm('채팅을 삭제하시겠습니까?')) {
             try {
-                deleteMessage (roomId,msgChatId);
+                deleteMessage(roomId, msgChatId);
                 setMessages(prev => prev.filter(msg => msg.chatId !== msgChatId));
             } catch (error) {
                 console.error('채팅 삭제 실패:', error);
@@ -44,9 +45,9 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
         }
     };
 
-        const handleSend = async() => {
+    const handleSend = async() => {
         if (input.trim()) {
-            sendMessage(loginUserId,receiver, input, roomId);
+            sendMessage(loginUserId, receiver, input, roomId);
             setInput('');
         }
     };
@@ -71,19 +72,19 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                 }
                 
                 // 일반 메시지인 경우
-                if (newMessage.sender !== loginUserId||newMessage.type==='CREATE') {
+                if (newMessage.sender !== loginUserId || newMessage.type === 'CREATE') {
                     setMessages(prev => [...prev, newMessage]);
                 }
             });
 
             getConversation(loginUserId, receiver, 10, chatId, roomId).then(response => {
-            setMessages(response.data.data.content.reverse());
-            setChatId(response.data.data.currentPage);
-            setTimeout(() => scrollToBottom(), 100);
-        }).catch(error => {
-            alert(error.response.data);
-            navigate(-1);
-        });
+                setMessages(response.data.data.content.reverse());
+                setChatId(response.data.data.currentPage);
+                setTimeout(() => scrollToBottom(), 100);
+            }).catch(error => {
+                alert(error.response.data);
+                navigate(-1);
+            });
         });
 
         return () => {
@@ -126,70 +127,31 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
         }
     };
 
-
     return (
-        <div style={{
-            maxWidth: '600px',
-            margin: '0 auto',
-            padding: '20px',
-            fontFamily: 'Arial, sans-serif',
-        }}>
-            <h2 style={{ textAlign: 'center', marginBottom: '10px', color: '#333' }}> 1:1 채팅</h2>
-            <p style={{ textAlign: 'center', marginBottom: '20px', color: connected ? '#4caf50' : '#f44336' }}>
+        <div className="chatroom-container">
+            <h2 className="chatroom-title">1:1 채팅</h2>
+            <p className={`chatroom-status ${connected ? 'connected' : 'disconnected'}`}>
                 {connected ? '✓ 연결됨' : '✗ 연결 중...'}
             </p>
 
             <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                style={{
-                    border: '1px solid #ddd',
-                    borderRadius: '12px',
-                    height: '400px',
-                    overflowY: 'auto',
-                    padding: '15px',
-                    marginBottom: '15px',
-                    backgroundColor: '#f7f7f7',
-                    display: 'flex',
-                    flexDirection: 'column'
-                }}
+                className="chatroom-messages"
             >
                 {isLoading && (
-                    <div style={{ textAlign: 'center', padding: '10px', color: '#999' }}>
-                        로딩 중...
-                    </div>
+                    <div className="chatroom-loading">로딩 중...</div>
                 )}
                 {messages.map((msg, idx) => {
                     const isMine = msg.sender === loginUserId;
                     return (
                         <div
                             key={idx}
-                            style={{
-                                display: 'flex',
-                                justifyContent: isMine ? 'flex-start' : 'flex-end',
-                                marginBottom: '10px',
-                                alignItems: 'flex-start'
-                            }}
+                            className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
                         >
-                            <div style={{
-                                maxWidth: '70%',
-                                padding: '10px 14px',
-                                borderRadius: '18px',
-                                backgroundColor: isMine ? '#4caf50' : '#e0e0e0',
-                                color: isMine ? 'white' : 'black',
-                                boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                                wordBreak: 'break-word',
-                                fontSize: '14px',
-                                lineHeight: '1.4',
-                                position: 'relative'
-                            }}>
+                            <div className={`message-bubble ${isMine ? 'mine' : 'other'}`}>
                                 {msg.content}
-                                <div style={{
-                                    fontSize: '10px',
-                                    marginTop: '5px',
-                                    textAlign: 'right',
-                                    color: isMine ? '#ddd' : '#555'
-                                }}>
+                                <div className={`message-time ${isMine ? 'mine' : 'other'}`}>
                                     {formatDateTime(msg.createdAt)}
                                 </div>
                             </div>
@@ -197,23 +159,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                             {isMine && msg.chatId && (
                                 <button
                                     onClick={() => handleDelete(msg.chatId!)}
-                                    style={{
-                                        marginLeft: '8px',
-                                        width: '20px',
-                                        height: '20px',
-                                        borderRadius: '50%',
-                                        border: 'none',
-                                        backgroundColor: '#ff4444',
-                                        color: 'white',
-                                        cursor: 'pointer',
-                                        fontSize: '12px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        flexShrink: 0,
-                                        padding: 0,
-                                        lineHeight: 1
-                                    }}
+                                    className="message-delete-btn"
                                     title="삭제"
                                 >
                                     ×
@@ -225,35 +171,19 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                 <div ref={messageEndRef} />
             </div>
 
-            <div style={{ display: 'flex', gap: '10px' }}>
+            <div className="chatroom-input-area">
                 <input
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="메시지를 입력하세요..."
-                    style={{
-                        flex: 1,
-                        padding: '12px',
-                        borderRadius: '20px',
-                        border: '1px solid #ccc',
-                        outline: 'none',
-                        fontSize: '14px'
-                    }}
+                    className="chatroom-input"
                 />
                 <button
                     onClick={handleSend}
                     disabled={!connected}
-                    style={{
-                        padding: '12px 20px',
-                        borderRadius: '20px',
-                        border: 'none',
-                        backgroundColor: '#4caf50',
-                        color: 'white',
-                        cursor: connected ? 'pointer' : 'not-allowed',
-                        fontWeight: 'bold',
-                        fontSize: '14px'
-                    }}
+                    className="chatroom-send-btn"
                 >
                     전송
                 </button>
@@ -263,4 +193,3 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
 };
 
 export default ChatRoomComponent;
-

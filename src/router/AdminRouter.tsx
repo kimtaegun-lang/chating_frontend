@@ -1,7 +1,7 @@
 import {lazy,Suspense} from "react";
-const MemberListPage =lazy(()=>import("../pages/MemberListPage"));
-const StatisticsPage=lazy(()=>import("../pages/StatisticsPage"));
-const MemberDetailComponent=lazy(()=>import("../pages/MemberDetailPage"));
+const MemberListPage =lazy(()=>import("../pages/admin/MemberListPage"));
+const StatisticsPage=lazy(()=>import("../pages/admin/StatisticsPage"));
+const MemberDetailComponent=lazy(()=>import("../pages/admin/MemberDetailPage"));
 const Loading=lazy(()=>import("../common/Loading"));
 const AdminRouter = () => {
    return [
