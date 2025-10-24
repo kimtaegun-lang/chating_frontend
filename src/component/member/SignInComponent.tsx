@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { signInData } from "./index";
+import { signInData } from '..';
 import { useNavigate } from "react-router-dom";
-import { signIn } from "../api/MemberApi";
+import { signIn } from "../../api/MemberApi";
 
 const SignInComponent = () => {
     const [userData, setUserData] = useState<signInData>({
@@ -54,10 +54,11 @@ const SignInComponent = () => {
                localStorage.setItem('refreshToken', res.data.data.refreshToken);
                localStorage.setItem('memId', res.data.data.memId);
              localStorage.setItem('name', res.data.data.name);
+             localStorage.setItem('role',res.data.data.role);
              navigate('/');
             })
             .catch((err) => {
-                alert(err.response.data);
+             alert(err.response.message);
             });
         setError({});
     };

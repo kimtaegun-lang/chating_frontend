@@ -1,4 +1,4 @@
-import StatisticsComponent from "../component/StatisticsComponent";
+import StatisticsComponent from "../../component/admin/StatisticsComponent";
 const StatisticsPage=()=> {
     return (
        < StatisticsComponent></StatisticsComponent>

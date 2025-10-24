@@ -1,0 +1,186 @@
+/* 채팅방 컨테이너 */
+.chatroom-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* 채팅방 제목 */
+.chatroom-title {
+    text-align: center;
+    margin-bottom: 10px;
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* 연결 상태 */
+.chatroom-status {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.chatroom-status.connected {
+    color: #4caf50;
+}
+
+.chatroom-status.disconnected {
+    color: #f44336;
+}
+
+/* 메시지 영역 */
+.chatroom-messages {
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    height: 400px;
+    overflow-y: auto;
+    padding: 15px;
+    margin-bottom: 15px;
+    background-color: #f7f7f7;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 로딩 텍스트 */
+.chatroom-loading {
+    text-align: center;
+    padding: 10px;
+    color: #999;
+    font-size: 0.9rem;
+}
+
+/* 메시지 래퍼 */
+.message-wrapper {
+    display: flex;
+    margin-bottom: 10px;
+    align-items: flex-start;
+}
+
+.message-wrapper.mine {
+    justify-content: flex-start;
+}
+
+.message-wrapper.other {
+    justify-content: flex-end;
+}
+
+/* 메시지 버블 */
+.message-bubble {
+    max-width: 70%;
+    padding: 10px 14px;
+    border-radius: 18px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    word-break: break-word;
+    font-size: 14px;
+    line-height: 1.4;
+    position: relative;
+}
+
+.message-bubble.mine {
+    background-color: #4caf50;
+    color: white;
+}
+
+.message-bubble.other {
+    background-color: #e0e0e0;
+    color: black;
+}
+
+/* 메시지 시간 */
+.message-time {
+    font-size: 10px;
+    margin-top: 5px;
+    text-align: right;
+}
+
+.message-time.mine {
+    color: #ddd;
+}
+
+.message-time.other {
+    color: #555;
+}
+
+/* 삭제 버튼 */
+.message-delete-btn {
+    margin-left: 8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: none;
+    background-color: #ff4444;
+    color: white;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+    line-height: 1;
+    transition: background-color 0.2s;
+}
+
+.message-delete-btn:hover {
+    background-color: #ff0000;
+}
+
+/* 입력 영역 */
+.chatroom-input-area {
+    display: flex;
+    gap: 10px;
+}
+
+/* 입력 필드 */
+.chatroom-input {
+    flex: 1;
+    padding: 12px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    outline: none;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.chatroom-input:focus {
+    border-color: #4caf50;
+}
+
+/* 전송 버튼 */
+.chatroom-send-btn {
+    padding: 12px 20px;
+    border-radius: 20px;
+    border: none;
+    background-color: #4caf50;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.chatroom-send-btn:hover:not(:disabled) {
+    background-color: #45a049;
+}
+
+.chatroom-send-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .chatroom-container {
+        padding: 15px;
+    }
+    
+    .chatroom-messages {
+        height: 300px;
+    }
+    
+    .message-bubble {
+        max-width: 80%;
+    }
+}

@@ -1,0 +1,132 @@
+/* 매칭 컨테이너 */
+.matching-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 40px;
+    text-align: center;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* 제목 */
+.matching-title {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+/* 설명 */
+.matching-description {
+    margin-bottom: 30px;
+    color: #666;
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* 매칭 시작 버튼 */
+.matching-start-btn {
+    padding: 15px 40px;
+    font-size: 1.125rem;
+    background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.matching-start-btn:hover {
+    background: linear-gradient(135deg, #45a049 0%, #3d8b40 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.matching-start-btn:active {
+    transform: translateY(0);
+}
+
+/* 매칭 중 박스 */
+.matching-progress {
+    padding: 40px 30px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    margin-bottom: 20px;
+    border: 2px solid #dee2e6;
+}
+
+/* 스피너 */
+.matching-spinner {
+    font-size: 3.5rem;
+    animation: spin 2s linear infinite;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* 매칭 메시지 */
+.matching-message {
+    font-size: 1.125rem;
+    color: #495057;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+}
+
+/* 서브 메시지 */
+.matching-submessage {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin: 0;
+}
+
+/* 취소 버튼 */
+.matching-cancel-btn {
+    padding: 12px 30px;
+    font-size: 1rem;
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.matching-cancel-btn:hover {
+    background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+}
+
+.matching-cancel-btn:active {
+    transform: translateY(0);
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .matching-container {
+        margin: 20px;
+        padding: 30px 20px;
+    }
+    
+    .matching-title {
+        font-size: 1.75rem;
+    }
+    
+    .matching-start-btn {
+        width: 100%;
+        padding: 15px 20px;
+    }
+    
+    .matching-cancel-btn {
+        width: 100%;
+    }
+}

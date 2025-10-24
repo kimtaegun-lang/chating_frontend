@@ -1,10 +1,9 @@
-// src/pages/admin/MemberList.tsx
 import React, { useEffect, useState } from 'react';
-import { getMembers, updateMemberStatus, deleteMember } from '../api/AdminApi';
+import { getMembers, updateMemberStatus, deleteMember } from "../../api/AdminApi";
 import { useNavigate } from 'react-router-dom';
-import '../MemberList.css'
+import '../../css/MemberList.css';
 
-const MemberListComponent: React.FC = () => {
+const MemberListComponent= () => {
     const navigate = useNavigate();
     const [members, setMembers] = useState<any[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(0);
@@ -23,6 +22,7 @@ const MemberListComponent: React.FC = () => {
             setCurrentPage(data.currentPage);
             setTotalPages(data.totalPages);
             setTotalElements(data.totalElements);
+            console.log(data.content);
         } catch (error) {
             console.error('회원 목록 조회 실패:', error);
             alert('회원 목록을 불러오는데 실패했습니다.');

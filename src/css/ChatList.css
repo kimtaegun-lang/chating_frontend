@@ -1,0 +1,97 @@
+/* 채팅 목록 컨테이너 */
+.chat-list-container {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 40px;
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    min-height: 500px;
+}
+
+/* 제목 */
+.chat-list-title {
+    text-align: center;
+    margin-bottom: 30px;
+    color: #333;
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* 로딩 */
+.chat-loading {
+    text-align: center;
+    padding: 60px 20px;
+    font-size: 1.1rem;
+    color: #667eea;
+}
+
+/* 빈 목록 */
+.chat-list-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+    font-size: 1.1rem;
+}
+
+/* 채팅방 목록 */
+.chat-rooms-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* 채팅방 카드 */
+.chat-room-card {
+    padding: 20px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    cursor: pointer;
+    background-color: #fff;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.chat-room-card:hover {
+    background-color: #f8f9fa;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    border-color: #667eea;
+}
+
+.chat-room-card:active {
+    transform: translateY(0);
+}
+
+/* 받는 사람 이름 */
+.chat-room-receiver {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+/* 날짜 */
+.chat-room-date {
+    font-size: 0.875rem;
+    color: #999;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .chat-list-container {
+        padding: 15px;
+    }
+    
+    .chat-list-title {
+        font-size: 1.5rem;
+    }
+    
+    .chat-room-card {
+        padding: 15px;
+    }
+}

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StompSubscription } from '@stomp/stompjs';
-import { connect, requestRandomMatch, cancelRandomMatch, disconnect } from '../api/ChatApi';
+import { connect, requestRandomMatch, cancelRandomMatch, disconnect } from '../../api/ChatApi';
+import '../../css/ChatMatching.css';
 
 const ChatMatchingComponent = () => {
     const [isMatching, setIsMatching] = useState(false);
@@ -122,100 +123,35 @@ const ChatMatchingComponent = () => {
     };
 
     return (
-        <div style={{
-            maxWidth: '600px',
-            margin: '50px auto',
-            padding: '40px',
-            textAlign: 'center',
-            fontFamily: 'Arial, sans-serif',
-            backgroundColor: '#fff',
-            borderRadius: '15px',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-        }}>
-            <h1 style={{ marginBottom: '20px', color: '#333', fontSize: '32px' }}>
-                랜덤 채팅 🎲
-            </h1>
-            <p style={{ marginBottom: '30px', color: '#666', fontSize: '16px' }}>
+        <div className="matching-container">
+            <h1 className="matching-title">랜덤 채팅 🎲</h1>
+            <p className="matching-description">
                 랜덤으로 매칭된 상대와 채팅을 시작해보세요!
             </p>
 
             {!isMatching ? (
                 <button
                     onClick={startMatching}
-                    style={{
-                        padding: '15px 40px',
-                        fontSize: '18px',
-                        backgroundColor: '#4caf50',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '25px',
-                        cursor: 'pointer',
-                        fontWeight: 'bold',
-                        transition: 'background-color 0.3s',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                    }}
+                    className="matching-start-btn"
                 >
                     매칭 시작
                 </button>
             ) : (
                 <div>
-                    <div style={{
-                        padding: '30px',
-                        backgroundColor: '#f8f9fa',
-                        borderRadius: '15px',
-                        marginBottom: '20px',
-                        border: '2px solid #e9ecef'
-                    }}>
-                        <div style={{
-                            fontSize: '50px',
-                            animation: 'spin 2s linear infinite',
-                            marginBottom: '15px'
-                        }}>
-                            ⌛
-                        </div>
-                        <p style={{ 
-                            fontSize: '18px', 
-                            color: '#495057',
-                            fontWeight: '500',
-                            margin: 0
-                        }}>
-                            {message}
-                        </p>
-                        <p style={{
-                            fontSize: '14px',
-                            color: '#6c757d',
-                            marginTop: '10px'
-                        }}>
-                            잠시만 기다려주세요...
-                        </p>
+                    <div className="matching-progress">
+                        <div className="matching-spinner">⌛</div>
+                        <p className="matching-message">{message}</p>
+                        <p className="matching-submessage">잠시만 기다려주세요...</p>
                     </div>
                     
                     <button
                         onClick={handleCancel}
-                        style={{
-                            padding: '12px 30px',
-                            fontSize: '16px',
-                            backgroundColor: '#dc3545',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '20px',
-                            cursor: 'pointer',
-                            fontWeight: '500',
-                            transition: 'background-color 0.3s',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                        }}
+                        className="matching-cancel-btn"
                     >
                         매칭 취소
                     </button>
                 </div>
             )}
-
-            <style>{`
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-            `}</style>
         </div>
     );
 };

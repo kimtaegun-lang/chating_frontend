@@ -1,43 +1,38 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { getUserInfo, signOut } from "../api/MemberApi";
 
 const MainComponent = () => {
     const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [username, setUsername] = useState<string>("");
+    const username=localStorage.getItem("name");
 
+    // 페이지 포커스될 때마다 체크 (로그아웃 반영)
     useEffect(() => {
-        const token = localStorage.getItem('accessToken');
+        const checkLoginStatus = () => {
+            const token = localStorage.getItem('accessToken');
+            const name = localStorage.getItem('userName');
 
-        if (token) {
-            // 토큰이 있으면 유저 정보 가져오기
-            getUserInfo()
-                .then((response) => {
-                    setIsLoggedIn(true);
-                    setUsername(response.data.data.name || response.data.data.loginId);
-                })
-                .catch((error) => {
-                    console.error("유저 정보 조회 실패:", error);
-                    localStorage.clear();
-                    setIsLoggedIn(false);
-                });
-        }
-    }, []);
-
-    const handleLogout = () => {
-        signOut()
-            .then((response) => {
-               alert(response.data);
-                localStorage.clear();
+            if (token) {
+                setIsLoggedIn(true);
+            } else {
                 setIsLoggedIn(false);
-                setUsername("");
-                navigate('/');
-            })
-            .catch((error) => {
-                alert(error.response.data);
-            });
-    };
+            }
+        };
+
+        // 초기 체크
+        checkLoginStatus();
+
+        // storage 이벤트 리스너 (다른 탭에서 로그아웃 시)
+        window.addEventListener('storage', checkLoginStatus);
+        
+        // 페이지 포커스 시 체크
+        window.addEventListener('focus', checkLoginStatus);
+
+        return () => {
+            window.removeEventListener('storage', checkLoginStatus);
+            window.removeEventListener('focus', checkLoginStatus);
+        };
+    }, []);
 
     return (
         <div className="main-container">
@@ -61,13 +56,6 @@ const MainComponent = () => {
                                 onClick={() => navigate('/chat/matching')}
                             >
                                 랜덤 매칭
-                            </button>
-
-                            <button
-                                className="btn btn-danger"
-                                onClick={() => handleLogout()}
-                            >
-                                로그아웃
                             </button>
                         </div>
                     </div>

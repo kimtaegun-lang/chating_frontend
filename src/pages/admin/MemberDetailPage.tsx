@@ -1,4 +1,4 @@
-import MemberDetailComponent from "../component/MemberDetailComponent";
+import MemberDetailComponent from "../../component/admin/MemberDetailComponent";
 import { useParams } from "react-router-dom";
 
 const MemberDetailPage = () => {
