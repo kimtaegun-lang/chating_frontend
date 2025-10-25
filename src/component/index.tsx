@@ -28,3 +28,10 @@ export interface chatRoom { // 채팅방
     receiver: string;
     createdAt: string;
 }
+
+export interface searchOptions {
+    search: string,
+     searchType:string,
+     sort:string,
+     sortType:string
+}
