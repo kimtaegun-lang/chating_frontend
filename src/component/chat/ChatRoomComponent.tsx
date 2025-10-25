@@ -47,22 +47,28 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
 
     const handleSend = async() => {
         if (input.trim()) {
+            try {
             sendMessage(loginUserId, receiver, input, roomId);
+            }
+            catch(error:any)
+            {
+                console.log(error.data.message);
+            }
             setInput('');
         }
     };
 
-    // 최초 로딩 시 스크롤 하단으로
-    useEffect(() => {
+    useEffect(() => { 
         if (!loginUserId) {
             alert('로그인이 필요합니다.');
-            navigate('../member/signIn');
+            navigate('../../member/signIn');
             return;
-        }
+        } 
 
         setConnected(true);
 
         connect(() => {
+
             subscribe(loginUserId, roomId, (newMessage) => {
                 
                 // 삭제 타입 메시지인 경우
@@ -82,14 +88,14 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                 setChatId(response.data.data.currentPage);
                 setTimeout(() => scrollToBottom(), 100);
             }).catch(error => {
-                alert(error.response.data);
-                navigate(-1);
+             alert(error.response.data);
+            navigate(-1); 
             });
         });
 
         return () => {
             disconnect();
-        };
+        }; 
     }, []);
 
     // 새 메시지 도착 시 스크롤 하단으로

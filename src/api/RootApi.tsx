@@ -23,11 +23,12 @@ api.interceptors.response.use(
         
         const errorData = error.response?.data as { error?: string; message?: string };
         
-        if (error.response?.status === 401 && 
-            errorData?.error === 'TOKEN_EXPIRED' &&
-            !originalRequest._retry) {
+         if (error.response?.status === 401 && !originalRequest._retry) {
+            const errorCode = errorData?.error;
             
-            originalRequest._retry = true;
+            // TOKEN_EXPIRED 또는 INVALID_TOKEN 모두 재발급 시도
+            if (errorCode === 'TOKEN_EXPIRED' || errorCode === 'INVALID_TOKEN') {
+                originalRequest._retry = true;
             
             const refreshToken = localStorage.getItem('refreshToken');
             
@@ -55,6 +56,7 @@ api.interceptors.response.use(
                     window.location.href = '../member/signIn';
                 }
                 return Promise.reject(refreshError);
+                }
             }
         }
         

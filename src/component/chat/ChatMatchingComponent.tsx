@@ -22,23 +22,22 @@ const ChatMatchingComponent = () => {
         
         // 컴포넌트 언마운트 시 정리
         return () => {
-            console.log("호출됨1");
             if (subscriptionRef.current) {
                  console.log("구독취소");
                 subscriptionRef.current.unsubscribe();
             }
             if (isMatchingRef.current) {
-                console.log("넌 취소가 되어야해");
                 cancelRandomMatch(loginUserId).catch(console.error);
             }
             disconnect();
         };
     }, []);
 
+    
     const startMatching = () => {
         if (!loginUserId) {
             alert('로그인이 필요합니다.');
-            navigate('../member/signIn');
+            navigate('../../member/signIn');
             return;
         }
 
