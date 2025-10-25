@@ -1,14 +1,21 @@
 // src/api/AdminApi.ts
 import { api } from './RootApi';
 import { serverPort } from "./RootApi";
-
+import { searchOptions } from '../component';
 const admin = `${serverPort}/api/admin`;
 
 // 회원 목록 조회 (페이징)
-export const getMembers = async (pageCount: number = 0, size: number = 10) => {
-    console.log(`${admin}/members`);
+export const getMembers = async (
+    pageCount: number = 0, 
+    size: number = 10, 
+    searchOption: searchOptions
+) => {
     const response = await api.get(`${admin}/members`, {
-        params: { pageCount, size }
+        params: { 
+            pageCount, 
+            size,
+            ...searchOption  
+        }
     });
     return response;
 }

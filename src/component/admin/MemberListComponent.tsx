@@ -2,27 +2,77 @@ import React, { useEffect, useState } from 'react';
 import { getMembers, updateMemberStatus, deleteMember } from "../../api/AdminApi";
 import { useNavigate } from 'react-router-dom';
 import '../../css/MemberList.css';
+import SearchComponent from '../common/SearchComponent';
+import PageComponent from '../common/PageComponent';
+import { searchOptions } from '..';
 
-const MemberListComponent= () => {
+const MemberListComponent = () => {
     const navigate = useNavigate();
     const [members, setMembers] = useState<any[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(0);
     const [totalElements, setTotalElements] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
+    const [searchOptions, setSearchOptions] = useState<searchOptions>({
+        search: "",
+        searchType: "",
+        sort: "createdAt",
+        sortType: "desc"
+    });
+
+    // 클라이언트 사이드 정렬 상태
+    const [clientSort, setClientSort] = useState<{ field: string, order: 'asc' | 'desc' } | null>(null);
+
+
+    const onSearchClick = () => {
+        setCurrentPage(0);
+        setClientSort(null); // 서버 검색 시 클라이언트 정렬 초기화
+        fetchMembers(0);
+    };
+
+    // 테이블 헤더 클릭 - 클라이언트 정렬
+    const handleClientSort = (field: string) => {
+        setClientSort(prev => {
+            if (prev?.field === field) {
+                return { field, order: prev.order === 'asc' ? 'desc' : 'asc' };
+            }
+            return { field, order: 'desc' };
+        });
+    };
+
+    // 클라이언트 정렬 적용
+    const getSortedMembers = () => {
+        if (!clientSort) return members;
+
+        return [...members].sort((a, b) => {
+            let aVal = a[clientSort.field];
+            let bVal = b[clientSort.field];
+
+            // 날짜 비교
+            if (clientSort.field === 'createdAt') {
+                aVal = new Date(aVal).getTime();
+                bVal = new Date(bVal).getTime();
+            }
+
+            if (clientSort.order === 'asc') {
+                return aVal > bVal ? 1 : -1;
+            } else {
+                return aVal < bVal ? 1 : -1;
+            }
+        });
+    };
 
     // 회원 목록 조회
     const fetchMembers = async (page: number = 0): Promise<void> => {
         setLoading(true);
         try {
-            const response = await getMembers(page, 10);
+            const response = await getMembers(page, 10, searchOptions);
             const data = response.data.data;
-            
+
             setMembers(data.content);
             setCurrentPage(data.currentPage);
             setTotalPages(data.totalPages);
             setTotalElements(data.totalElements);
-            console.log(data.content);
         } catch (error) {
             console.error('회원 목록 조회 실패:', error);
             alert('회원 목록을 불러오는데 실패했습니다.');
@@ -34,10 +84,10 @@ const MemberListComponent= () => {
     // 회원 상태 변경
     const handleStatusChange = async (memberId: string, currentStatus: string): Promise<void> => {
         const newStatus = currentStatus === 'ACTIVE' ? 'BANNED' : 'ACTIVE';
-        const confirmMessage = newStatus === 'BANNED' 
-            ? '이 회원을 정지하시겠습니까?' 
+        const confirmMessage = newStatus === 'BANNED'
+            ? '이 회원을 정지하시겠습니까?'
             : '이 회원의 정지를 해제하시겠습니까?';
-        
+
         if (!window.confirm(confirmMessage)) return;
 
         try {
@@ -69,15 +119,22 @@ const MemberListComponent= () => {
         navigate(`/admin/member/${memberId}`);
     };
 
+    // 채팅 내역 확인
+    const handleChatHistory = (memberId: string): void => {
+        navigate(`/admin/member/${memberId}/chat`);
+    };
+
     // 페이지 변경
     const handlePageChange = (page: number): void => {
         if (page >= 0 && page < totalPages) {
+            setClientSort(null); // 페이지 변경 시 클라이언트 정렬 초기화
             fetchMembers(page);
         }
     };
 
+    // 초기 로딩
     useEffect(() => {
-        fetchMembers();
+        fetchMembers(0);
     }, []);
 
     if (loading) {
@@ -94,11 +151,17 @@ const MemberListComponent= () => {
         );
     }
 
+    const sortedMembers = getSortedMembers();
+
     return (
         <div className="main-container">
             <div className="main-content">
                 <h2 className="main-title">👥 회원 관리</h2>
-                
+                <SearchComponent
+                    searchOption={searchOptions}
+                    setSearchOptions={setSearchOptions}
+                    onSearchClick={onSearchClick}
+                />
                 <div className="user-section">
                     <p className="welcome-text">
                         전체 <span className="username">{totalElements}</span>명의 회원이 있습니다
@@ -109,17 +172,38 @@ const MemberListComponent= () => {
                     <table className="member-table">
                         <thead>
                             <tr>
-                                <th>아이디</th>
-                                <th>이름</th>
-                                <th>이메일</th>
+                                <th
+                                    onClick={() => handleClientSort('memId')}
+                                    style={{ cursor: 'pointer', userSelect: 'none' }}
+                                >
+                                    아이디 {clientSort?.field === 'memId' && (clientSort.order === 'desc' ? '▼' : '▲')}
+                                </th>
+                                <th
+                                    onClick={() => handleClientSort('name')}
+                                    style={{ cursor: 'pointer', userSelect: 'none' }}
+                                >
+                                    이름 {clientSort?.field === 'name' && (clientSort.order === 'desc' ? '▼' : '▲')}
+                                </th>
+                                <th
+                                    onClick={() => handleClientSort('email')}
+                                    style={{ cursor: 'pointer', userSelect: 'none' }}
+                                >
+                                    이메일 {clientSort?.field === 'email' && (clientSort.order === 'desc' ? '▼' : '▲')}
+                                </th>
                                 <th>성별</th>
                                 <th>권한</th>
-                                <th>가입일</th>
+                                <th>상태</th> {/* 추가 */}
+                                <th
+                                    onClick={() => handleClientSort('createdAt')}
+                                    style={{ cursor: 'pointer', userSelect: 'none' }}
+                                >
+                                    가입일 {clientSort?.field === 'createdAt' && (clientSort.order === 'desc' ? '▼' : '▲')}
+                                </th>
                                 <th>관리</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {members.map((member: any) => (
+                            {sortedMembers.map((member: any) => (
                                 <tr key={member.memId}>
                                     <td>{member.memId}</td>
                                     <td>{member.name}</td>
@@ -130,22 +214,33 @@ const MemberListComponent= () => {
                                             {member.role}
                                         </span>
                                     </td>
-                                    <td>{new Date(member.createdAt).toLocaleDateString()}</td>
+                                    <td> {/* 추가 */}
+                                        <span className={`status-badge ${member.status === 'ACTIVE' ? 'status-active' : 'status-banned'}`}>
+                                            {member.status === 'ACTIVE' ? '활성' : '정지'}
+                                        </span>
+                                    </td>
+                                    <td>{new Date(member.createdAt).toLocaleString()}</td>
                                     <td>
-                                        <div className="button-group">
-                                            <button 
+                                        <div className="button-group" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                            <button
                                                 className="btn btn-primary btn-sm"
                                                 onClick={() => handleDetail(member.memId)}
                                             >
                                                 상세보기
                                             </button>
-                                            <button 
+                                            <button
+                                                className="btn btn-info btn-sm"
+                                                onClick={() => handleChatHistory(member.memId)}
+                                            >
+                                                채팅내역
+                                            </button>
+                                            <button
                                                 className={`btn btn-sm ${member.status === 'ACTIVE' ? 'btn-danger' : 'btn-secondary'}`}
                                                 onClick={() => handleStatusChange(member.memId, member.status)}
                                             >
                                                 {member.status === 'ACTIVE' ? '정지' : '해제'}
                                             </button>
-                                            <button 
+                                            <button
                                                 className="btn btn-danger btn-sm"
                                                 onClick={() => handleDelete(member.memId)}
                                             >
@@ -159,25 +254,11 @@ const MemberListComponent= () => {
                     </table>
                 </div>
 
-                <div className="pagination">
-                    <button 
-                        className="btn btn-outline"
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 0}
-                    >
-                        이전
-                    </button>
-                    <span className="page-info">
-                        <span className="username">{currentPage + 1}</span> / {totalPages}
-                    </span>
-                    <button 
-                        className="btn btn-outline"
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages - 1}
-                    >
-                        다음
-                    </button>
-                </div>
+                <PageComponent
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                />
             </div>
         </div>
     );
