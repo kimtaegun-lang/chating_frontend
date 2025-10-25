@@ -33,3 +33,21 @@ export const getUserInfo=async()=> {
     const response=await api.get(member+"/getMemberInfo");  
     return response;
 }
+
+// 회원 정보 수정
+export const updateMemberInfo = async (updateData: {
+    email?: string;
+    phone?: string;
+    addr?: string;
+    currentPwd?: string;
+    newPwd?: string;
+}) => {
+    const response = await api.put(member + "/updateMemberInfo", updateData);
+    return response;
+}
+
+// 회원 탈퇴
+export const deleteMember = async () => {
+    const response = await api.delete(member + "/deleteMember");
+    return response;
+}

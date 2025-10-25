@@ -100,7 +100,7 @@ const Header = () => {
                             {showDropdown && (
                                 <div className="dropdown-menu">
                                     <button onClick={() => {
-                                        navigate('/profile');
+                                        navigate('member/profile');
                                         setShowDropdown(false);
                                     }}>
                                         내 프로필

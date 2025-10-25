@@ -120,3 +120,8 @@
         width: 100%;
     }
 }
+.member-table th.column-name {
+  color: black;
+  text-align: left;
+  padding: 8px;
+}
