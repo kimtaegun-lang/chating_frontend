@@ -58,7 +58,7 @@ const SignInComponent = () => {
              navigate('/');
             })
             .catch((err) => {
-             alert(err.response.message);
+             alert(err.response.data);
             });
         setError({});
     };
