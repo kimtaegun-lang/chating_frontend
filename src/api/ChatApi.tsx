@@ -129,7 +129,7 @@ export const requestRandomMatch = (userId: string, onMatch: (data: any) => void)
         return null;
     }
     
-    // 1. 먼저 매칭 결과 구독
+    // 먼저 매칭 결과 구독
     const subscription = stompClient.subscribe(
         `/queue/match-${userId}`,
         (msg: any) => {   
@@ -142,7 +142,7 @@ export const requestRandomMatch = (userId: string, onMatch: (data: any) => void)
         }
     );
     
-    // 2. 구독 완료 후 매칭 요청
+    // 구독 완료 후 매칭 요청
     setTimeout(() => {
         if (stompClient && stompClient.connected) {
             stompClient.publish({

@@ -11,6 +11,11 @@ const ChatListComponent = () => {
     const loginUserId = localStorage.getItem('memId') || '';
 
     useEffect(() => {
+         if (!loginUserId) {
+            alert('로그인이 필요합니다.');
+            navigate('../../member/signIn');
+            return;
+        } 
         fetchChatRooms();
     }, [loginUserId]);
 
@@ -24,6 +29,7 @@ const ChatListComponent = () => {
             .catch((err) => {
                 alert(err.response.data);
                 setLoading(false);
+                navigate(-1);
             });
     };
 
