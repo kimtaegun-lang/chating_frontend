@@ -45,10 +45,6 @@ const AdminChatRoomComponent = () => {
         }
     };
 
-    const handleBack = () => {
-        navigate(`/admin/member/${memberId}/chat`);
-    };
-
     useEffect(() => { 
         if (!memberId || !roomId || !receiver) {
             alert('잘못된 접근입니다.');
@@ -128,26 +124,21 @@ const AdminChatRoomComponent = () => {
 
     return (
         <div className="chatroom-container">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
-                <button onClick={handleBack} className="btn btn-outline">
-                    ← 돌아가기
-                </button>
-                <h2 className="chatroom-title">채팅 내역 조회 (관리자 모드)</h2>
+            <div className="chatroom-header">
+                <div className="chatroom-header-content">
+                    <h2 className="chatroom-title">
+                        {memberId} ↔ {receiver}
+                    </h2>
+                    <span className={`chatroom-status ${connected ? 'connected' : 'disconnected'}`}>
+                        {connected ? '● 연결됨' : '○ 연결 중...'}
+                    </span>
+                </div>
+                <div className="admin-badge">관리자 모드</div>
             </div>
-            
-            <p className={`chatroom-status ${connected ? 'connected' : 'disconnected'}`}>
-                {connected ? '✓ 연결됨' : '✗ 연결 중...'}
-            </p>
 
-            <div className="admin-chat-info" style={{
-                padding: '12px',
-                background: '#fff3cd',
-                borderRadius: '6px',
-                marginBottom: '12px',
-                fontSize: '14px',
-                color: '#856404'
-            }}>
-                📋 읽기 전용 모드입니다. 메시지 삭제만 가능합니다.
+            <div className="admin-notice">
+                <span className="admin-notice-icon">🔒</span>
+                읽기 전용 모드 - 메시지 삭제만 가능합니다
             </div>
 
             <div
@@ -156,21 +147,27 @@ const AdminChatRoomComponent = () => {
                 className="chatroom-messages"
             >
                 {isLoading && (
-                    <div className="chatroom-loading">로딩 중...</div>
+                    <div className="chatroom-loading">
+                        <div className="loading-spinner"></div>
+                        <span>이전 메시지 불러오는 중...</span>
+                    </div>
                 )}
                 {messages.map((msg, idx) => {
-                    const isSender = msg.sender === memberId;
+                    // memberId가 보낸 메시지는 좌측, receiver가 보낸 메시지는 우측
+                    const isLeftSide = msg.sender === memberId;
                     return (
                         <div
                             key={idx}
-                            className={`message-wrapper ${isSender ? 'mine' : 'other'}`}
+                            className={`message-wrapper ${isLeftSide ? 'left' : 'right'}`}
                         >
-                            <div className={`message-bubble ${isSender ? 'mine' : 'other'}`}>
-                                <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                            <div className={`message-bubble ${isLeftSide ? 'left' : 'right'}`}>
+                                <div className="message-sender">
                                     {msg.sender}
                                 </div>
-                                {msg.content}
-                                <div className={`message-time ${isSender ? 'mine' : 'other'}`}>
+                                <div className="message-content">
+                                    {msg.content}
+                                </div>
+                                <div className="message-time">
                                     {formatDateTime(msg.createdAt)}
                                 </div>
                             </div>
@@ -179,10 +176,9 @@ const AdminChatRoomComponent = () => {
                                 <button
                                     onClick={() => handleDelete(msg.chatId!)}
                                     className="message-delete-btn"
-                                    title="삭제"
-                                    style={{ background: '#dc3545' }}
+                                    title="메시지 삭제"
                                 >
-                                    ×
+                                    ✕
                                 </button>
                             )}
                         </div>
@@ -190,8 +186,6 @@ const AdminChatRoomComponent = () => {
                 })}
                 <div ref={messageEndRef} />
             </div>
-
-            {/* 입력창 제거 - 읽기 전용 */}
         </div>
     );
 };

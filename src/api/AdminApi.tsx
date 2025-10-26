@@ -45,3 +45,10 @@ export const getStatistics = async () => {
     const response = await api.get(`${admin}/statistics`);
     return response;
 }
+
+// 채팅방 삭제
+export const deleteRoom=async (roomId: number) => {
+    console.log(`${admin}/members/deleteRoom/${roomId}`);
+    const response = await api.delete(`${admin}/members/deleteRoom/${roomId}`);
+    return response;
+};

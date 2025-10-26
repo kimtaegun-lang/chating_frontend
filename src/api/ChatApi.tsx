@@ -161,3 +161,4 @@ export const cancelRandomMatch = async (userId: string) => {
     const response = await api.post(`api/random/cancel`, { userId });
     return response;
 };
+
