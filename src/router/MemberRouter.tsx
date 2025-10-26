@@ -1,6 +1,7 @@
 import {lazy,Suspense} from "react";
 const SignInPage =lazy(()=>import("../pages/member/SignInPage"));
 const SignUpPage=lazy(()=>import("../pages/member/SignUpPage"));
+const ProfilePage=lazy(()=>import("../pages/member/ProfilePage"));
 const Loading=lazy(()=>import("../common/Loading"));
 const MemberRouter = () => {
    return [
@@ -11,6 +12,10 @@ const MemberRouter = () => {
         {
             path:"signUp",
             element:<Suspense fallback={<Loading />}><SignUpPage/></Suspense>
+        },
+        {
+            path:"profile",
+            element:<Suspense fallback={<Loading/>}><ProfilePage/></Suspense>
         }
     ]
 }

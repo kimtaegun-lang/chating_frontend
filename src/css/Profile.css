@@ -1,0 +1,185 @@
+/* ProfileComponent.css */
+
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.profile-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.profile-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.profile-table th {
+  background-color: #f5f5f5;
+  padding: 12px 16px;
+  text-align: left;
+  font-weight: 600;
+  width: 30%;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.profile-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.profile-table tr:last-child th,
+.profile-table tr:last-child td {
+  border-bottom: none;
+}
+
+.profile-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.profile-input:focus {
+  outline: none;
+  border-color: #2196F3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+.button-container {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-edit {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.btn-edit:hover {
+  background-color: #45a049;
+}
+
+.btn-delete {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-delete:hover {
+  background-color: #da190b;
+}
+
+.btn-save {
+  background-color: #2196F3;
+  color: white;
+}
+
+.btn-save:hover {
+  background-color: #0b7dda;
+}
+
+.btn-cancel {
+  background-color: #9E9E9E;
+  color: white;
+}
+
+.btn-cancel:hover {
+  background-color: #757575;
+}
+
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.loading-content {
+  text-align: center;
+}
+
+.spinner-container {
+  position: relative;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 20px;
+}
+
+.spinner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.spinner-inner {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite reverse;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.error-text {
+  color: #f44336;
+  text-align: center;
+  padding: 20px;
+  font-size: 16px;
+  font-weight: 500;
+}
