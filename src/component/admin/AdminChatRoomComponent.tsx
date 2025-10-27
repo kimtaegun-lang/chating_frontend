@@ -15,10 +15,11 @@ const AdminChatRoomComponent = () => {
     const prevScrollHeightRef = useRef<number>(0);
     const navigate = useNavigate();
 
-    const scrollToBottom = () => {
-        messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
+  const scrollToBottom = () => {
+    if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+};
     // 날짜/시간 포맷팅 함수
     const formatDateTime = (dateString: string) => {
         const date = new Date(dateString);

@@ -16,10 +16,11 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     const prevScrollHeightRef = useRef<number>(0);
     const navigate = useNavigate();
 
-    const scrollToBottom = () => {
-        messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
+   const scrollToBottom = () => {
+    if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+    }
+};
     // 날짜/시간 포맷팅 함수
     const formatDateTime = (dateString: string) => {
         const date = new Date(dateString);
@@ -135,10 +136,14 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
 
     return (
         <div className="chatroom-container">
-            <h2 className="chatroom-title">1:1 채팅</h2>
-            <p className={`chatroom-status ${connected ? 'connected' : 'disconnected'}`}>
-                {connected ? '✓ 연결됨' : '✗ 연결 중...'}
-            </p>
+            <div className="chatroom-header">
+                <div className="chatroom-header-content">
+                    <h2 className="chatroom-title">💬 1:1 채팅</h2>
+                    <p className={`chatroom-status ${connected ? 'connected' : 'disconnected'}`}>
+                        {connected ? '✓ 연결됨' : '✗ 연결 중...'}
+                    </p>
+                </div>
+            </div>
 
             <div
                 ref={scrollContainerRef}
@@ -146,18 +151,21 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                 className="chatroom-messages"
             >
                 {isLoading && (
-                    <div className="chatroom-loading">로딩 중...</div>
+                    <div className="chatroom-loading">
+                        <div className="loading-spinner"></div>
+                        <span>로딩 중...</span>
+                    </div>
                 )}
                 {messages.map((msg, idx) => {
                     const isMine = msg.sender === loginUserId;
                     return (
                         <div
                             key={idx}
-                            className={`message-wrapper ${isMine ? 'mine' : 'other'}`}
+                            className={`message-wrapper ${isMine ? 'right' : 'left'}`}
                         >
-                            <div className={`message-bubble ${isMine ? 'mine' : 'other'}`}>
-                                {msg.content}
-                                <div className={`message-time ${isMine ? 'mine' : 'other'}`}>
+                            <div className={`message-bubble ${isMine ? 'right' : 'left'}`}>
+                                <div className="message-content">{msg.content}</div>
+                                <div className={`message-time ${isMine ? 'right' : 'left'}`}>
                                     {formatDateTime(msg.createdAt)}
                                 </div>
                             </div>
