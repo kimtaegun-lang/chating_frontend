@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getMembers, updateMemberStatus, deleteMember } from "../../api/AdminApi";
+import { getMembers, updateMemberStatus,deleteMember } from "../../api/AdminApi";
 import { useNavigate } from 'react-router-dom';
 import '../../css/MemberList.css';
 import SearchComponent from '../common/SearchComponent';

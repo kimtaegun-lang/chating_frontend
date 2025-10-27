@@ -1,6 +1,6 @@
 import { message } from '..';
 import { useEffect, useState, useRef } from "react";
-import { connect, subscribe, sendMessage, disconnect, getConversation, deleteMessage } from '../../api/ChatApi';
+import { connect, subscribe, sendMessage, disconnect, getConversation, deleteMessage, getReceiverStatus } from '../../api/ChatApi';
 import { useNavigate } from "react-router-dom";
 import '../../css/ChatRoom.css';
 
@@ -14,13 +14,14 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     const messageEndRef = useRef<HTMLDivElement | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const prevScrollHeightRef = useRef<number>(0);
+    const [isReceiverActive, setIsReceiverActive] = useState<boolean>();
     const navigate = useNavigate();
 
-   const scrollToBottom = () => {
-    if (scrollContainerRef.current) {
-        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-    }
-};
+    const scrollToBottom = () => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+        }
+    };
     // 날짜/시간 포맷팅 함수
     const formatDateTime = (dateString: string) => {
         const date = new Date(dateString);
@@ -29,7 +30,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
         const day = String(date.getDate()).padStart(2, '0');
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
-        
+
         return `${year}/${month}/${day} ${hours}:${minutes}`;
     };
 
@@ -46,38 +47,45 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
         }
     };
 
-    const handleSend = async() => {
+    const handleSend = async () => {
         if (input.trim()) {
             try {
-            sendMessage(loginUserId, receiver, input, roomId);
+                sendMessage(loginUserId, receiver, input, roomId);
             }
-            catch(error:any)
-            {
+            catch (error: any) {
                 console.log(error.data.message);
             }
             setInput('');
         }
     };
 
-    useEffect(() => { 
+    useEffect(() => {
         if (!loginUserId) {
             alert('로그인이 필요합니다.');
             navigate('../../member/signIn');
             return;
-        } 
+        }
 
-        setConnected(true);
+        getReceiverStatus(receiver).then(response => {
+            const isActive = response.data;
+            setIsReceiverActive(isActive);
+        }).catch(error => {
+            console.error('회원 상태 조회 실패:', error);
+        });
 
+        if (isReceiverActive) {
+            setConnected(true);
+        }
         connect(() => {
 
             subscribe(loginUserId, roomId, (newMessage) => {
-                
+
                 // 삭제 타입 메시지인 경우
                 if (newMessage.type === 'DELETE') {
                     setMessages(prev => prev.filter(msg => msg.chatId !== newMessage.chatId));
                     return;
                 }
-                
+
                 // 일반 메시지인 경우
                 if (newMessage.sender !== loginUserId || newMessage.type === 'CREATE') {
                     setMessages(prev => [...prev, newMessage]);
@@ -85,18 +93,19 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
             });
 
             getConversation(loginUserId, receiver, 10, chatId, roomId).then(response => {
+                console.log(response.data.data);
                 setMessages(response.data.data.content.reverse());
                 setChatId(response.data.data.currentPage);
                 setTimeout(() => scrollToBottom(), 100);
             }).catch(error => {
-             alert(error.response.data);
-            navigate(-1); 
+                alert(error.response.data);
+                navigate(-1);
             });
         });
 
         return () => {
             disconnect();
-        }; 
+        };
     }, []);
 
     // 새 메시지 도착 시 스크롤 하단으로
@@ -116,10 +125,10 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
             getConversation(loginUserId, receiver, 10, chatId, roomId).then(response => {
                 const newMessages = response.data.data.content.reverse();
                 const newChatId = response.data.data.currentPage;
-                
+
                 setMessages(prev => [...newMessages, ...prev]);
                 setChatId(newChatId);
-                
+
                 setTimeout(() => {
                     if (container) {
                         const newScrollHeight = container.scrollHeight;
@@ -139,9 +148,6 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
             <div className="chatroom-header">
                 <div className="chatroom-header-content">
                     <h2 className="chatroom-title">💬 1:1 채팅</h2>
-                    <p className={`chatroom-status ${connected ? 'connected' : 'disconnected'}`}>
-                        {connected ? '✓ 연결됨' : '✗ 연결 중...'}
-                    </p>
                 </div>
             </div>
 
@@ -169,7 +175,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                                     {formatDateTime(msg.createdAt)}
                                 </div>
                             </div>
-                            
+
                             {isMine && msg.chatId && (
                                 <button
                                     onClick={() => handleDelete(msg.chatId!)}
@@ -188,11 +194,13 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
             <div className="chatroom-input-area">
                 <input
                     type="text"
-                    value={input}
+                    value={isReceiverActive === false ? "탈퇴한 사용자와 대화 할 수 없습니다." : input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="메시지를 입력하세요..."
                     className="chatroom-input"
+                    disabled={!isReceiverActive}
+                    readOnly={!isReceiverActive}
                 />
                 <button
                     onClick={handleSend}

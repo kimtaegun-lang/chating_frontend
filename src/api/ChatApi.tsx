@@ -161,3 +161,11 @@ export const cancelRandomMatch = async (userId: string) => {
     const response = await api.post(`api/random/cancel`, { userId });
     return response;
 };
+
+// 상대방 회원 상태 확인
+export const getReceiverStatus = async(receiverId: string) => {
+    const response = await api.get(`${chat}/receiver-status`, {
+        params: { receiverId }
+    });
+    return response;
+};
