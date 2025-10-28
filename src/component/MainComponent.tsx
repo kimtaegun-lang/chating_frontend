@@ -9,6 +9,7 @@ const MainComponent = () => {
     // 페이지 포커스될 때마다 체크 (로그아웃 반영)
     useEffect(() => {
         const checkLoginStatus = () => {
+            console.log("커밋테스트");
             const token = localStorage.getItem('accessToken');
             const name = localStorage.getItem('userName');
 

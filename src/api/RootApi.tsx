@@ -1,13 +1,11 @@
 import axios, { AxiosError } from 'axios';
 
-const serverPort = process.env.NODE_ENV === 'production'
-  ? 'https://chat-backend-v1-0.onrender.com'
-  : 'http://localhost:8080';
+const serverPort = process.env.REACT_APP_SERVER_PORT;
 
 const api = axios.create({
     baseURL: serverPort
 });
-
+console.log("서버 포트:", serverPort);
 // http 요청 인터셉터 설정 api를 사용해서 요청할 때마다 토큰을 헤더에 포함
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem('accessToken');
