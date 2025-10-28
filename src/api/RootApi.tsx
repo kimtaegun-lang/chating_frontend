@@ -1,9 +1,11 @@
 import axios, { AxiosError } from 'axios';
 
-const serverPort = "http://localhost:8080";
+const API_BASE_URL = process.env.NODE_ENV === 'production'
+  ? 'https://chat-backend-v1-0.onrender.com'
+  : 'http://localhost:8080';
 
 const api = axios.create({
-    baseURL: serverPort
+    baseURL: API_BASE_URL
 });
 
 // http 요청 인터셉터 설정 api를 사용해서 요청할 때마다 토큰을 헤더에 포함
@@ -40,7 +42,7 @@ api.interceptors.response.use(
             }
 
             try {
-                const result = await axios.post(`${serverPort}/api/refresh`, { refreshToken });
+                const result = await axios.post(`${API_BASE_URL}/api/refresh`, { refreshToken });
                 
                 if (result.data.accessToken) {
                     localStorage.setItem('accessToken', result.data.accessToken);
@@ -64,4 +66,4 @@ api.interceptors.response.use(
     }
 );
 
-export { serverPort, api };
+export { API_BASE_URL, api };
