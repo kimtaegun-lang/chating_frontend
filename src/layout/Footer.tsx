@@ -16,26 +16,15 @@ const Footer = () => {
                     <ul>
                         <li><a href="/chat/list">채팅 목록</a></li>
                         <li><a href="/chat/matching">랜덤 매칭</a></li>
-                        <li><a href="/about">서비스 소개</a></li>
                     </ul>
                 </div>
 
-                <div className="footer-section">
-                    <h4>고객지원</h4>
-                    <ul>
-                        <li><a href="/faq">자주 묻는 질문</a></li>
-                        <li><a href="/contact">문의하기</a></li>
-                        <li><a href="/terms">이용약관</a></li>
-                        <li><a href="/privacy">개인정보처리방침</a></li>
-                    </ul>
-                </div>
 
                 <div className="footer-section">
-                    <h4>연결하기</h4>
+                    <h4>contact</h4>
                     <div className="social-links">
-                        <a href="https://github.com" target="_blank" rel="noopener noreferrer">GitHub</a>
-                        <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-                        <a href="mailto:contact@example.com">Email</a>
+                        <h5>GitHub: https://github.com/kimtaegun-lang</h5>
+                        <h5>Email: tee1694@naver.com</h5>
                     </div>
                 </div>
             </div>

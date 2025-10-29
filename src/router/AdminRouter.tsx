@@ -1,6 +1,5 @@
 import {lazy,Suspense} from "react";
 const MemberListPage =lazy(()=>import("../pages/admin/MemberListPage"));
-const StatisticsPage=lazy(()=>import("../pages/admin/StatisticsPage"));
 const MemberDetailComponent=lazy(()=>import("../pages/admin/MemberDetailPage"));
 const AdminChatListPage=lazy(()=>import("../pages/admin/AdminChatListPage"));
 const AdminChatRoomPage=lazy(()=>import("../pages/admin/AdminChatRoomPage"));
@@ -10,10 +9,6 @@ const AdminRouter = () => {
         {
             path:"memberList",
             element:<Suspense fallback={<Loading />}><MemberListPage/></Suspense>
-        },
-        {
-            path:"statistics",
-            element:<Suspense fallback={<Loading />}><StatisticsPage/></Suspense>
         },
         {
             path:"member/:memberId",
