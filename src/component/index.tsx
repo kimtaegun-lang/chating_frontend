@@ -35,3 +35,20 @@ export interface searchOptions {
      sort:string,
      sortType:string
 }
+
+export interface updateMemberData { // 회원 정보 수정 데이터
+    email: string;
+    phone: string;
+    addr: string;
+    currentPwd?: string;  
+    newPwd?: string;     
+}
+
+export interface updateFormData { // 회원 정보 수정 폼 데이터
+    email: string;
+    phone: string;
+    addr: string;
+    currentPwd: string;
+    newPwd: string;
+    confirmPwd: string;
+}

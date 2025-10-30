@@ -1,34 +1,33 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { signOut } from "../api/MemberApi";
+import { RootState } from "../store/store";
+import { useSelector, useDispatch } from "react-redux";
+import { clearUser } from "../store/authSlice";
 import '../css/Header.css'
 
 const Header = () => {
     const navigate = useNavigate();
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const username=localStorage.getItem('name');
-    const [isAdmin, setIsAdmin] = useState(false);  
+    const dispatch = useDispatch();
+    
+    // Redux에서 상태 가져오기
+    const { isLoggedIn, user } = useSelector((state: RootState) => state.auth);
+    
     const [showDropdown, setShowDropdown] = useState(false);
     const [showAdminDropdown, setShowAdminDropdown] = useState(false);
-
-    useEffect(() => {
-        const token = localStorage.getItem('accessToken');
-        const role = localStorage.getItem('role');
-        const name = localStorage.getItem('userName');
-
-        if (token) {
-            setIsLoggedIn(true);
-            setIsAdmin(role === 'ADMIN'); 
-        }
-    }, []);
+    
+    // user 객체에서 정보 추출
+    const isAdmin = user?.role === 'ADMIN';
+    const username = user?.name;
 
     const handleLogout = () => {
         signOut()
             .then((response) => {
                 alert(response.data);
+                // Redux 상태 초기화
+                dispatch(clearUser());
+                // localStorage도 정리
                 localStorage.clear();
-                setIsLoggedIn(false);
-                setIsAdmin(false);
                 navigate('/');
             })
             .catch((error) => {
@@ -74,12 +73,6 @@ const Header = () => {
                                             }}>
                                                 회원 목록
                                             </button>
-                                            <button onClick={() => {
-                                                navigate('/admin/statistics');
-                                                setShowAdminDropdown(false);
-                                            }}>
-                                                통계
-                                            </button>
                                         </div>
                                     )}
                                 </div>
@@ -100,7 +93,7 @@ const Header = () => {
                             {showDropdown && (
                                 <div className="dropdown-menu">
                                     <button onClick={() => {
-                                        navigate('member/profile');
+                                        navigate('/member/profile');
                                         setShowDropdown(false);
                                     }}>
                                         내 프로필

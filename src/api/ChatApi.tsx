@@ -32,11 +32,11 @@ export const connect = (onConnect: () => void) => {
     stompClient.activate();
 };
 
-export const subscribe = (loginId: string, roomId: number, onMessage: (message: any) => void) => {
+export const subscribe = (roomId: number, onMessage: (message: any) => void,loginId?: string) => {
     
     if (!stompClient?.connected) {
         console.error("stompClient가 연결되지 않음");
-        setTimeout(() => subscribe(loginId, roomId, onMessage), 1000);
+        setTimeout(() => subscribe( roomId, onMessage), 1000,loginId);
         return;
     }
     
@@ -64,7 +64,7 @@ export const subscribe = (loginId: string, roomId: number, onMessage: (message: 
         return null;
     }
 };
-export const sendMessage = (sender:string,receiver: string, content: string,roomId:number) => {
+export const sendMessage = (receiver: string, content: string,roomId:number,sender?:string) => {
     if (!stompClient || !stompClient.connected) {
         console.warn('STOMP 클라이언트가 연결되지 않았습니다.');
         return;
@@ -102,7 +102,7 @@ export const disconnect = () => {
 };
 
 // 본인 채팅방 목록 조회
-export const getMyChatRooms = async(userId: string)=>{
+export const getMyChatRooms = async(userId?: string)=>{
     const response=await api.get(`${chat}/chatRooms`,{
         params:{userId}
     });
@@ -110,7 +110,7 @@ export const getMyChatRooms = async(userId: string)=>{
 };
 
 // 채팅 내역 조회
-export const getConversation = async(user1: string, user2: string, limit: number, chatId: number,roomId:number) => {
+export const getConversation = async(user2: string, limit: number, chatId: number,roomId:number,user1?: string) => {
     console.log(user1, user2, limit, chatId);
     const response = await api.post(`${chat}/getConversation`, {
         user1,
@@ -123,7 +123,7 @@ export const getConversation = async(user1: string, user2: string, limit: number
 };
 
 // 랜덤 매칭 요청
-export const requestRandomMatch = (userId: string, onMatch: (data: any) => void): StompSubscription | null => {
+export const requestRandomMatch = (onMatch: (data: any) => void,userId?:String): StompSubscription | null => {
     if (!stompClient || !stompClient.connected) {
         console.warn('STOMP 클라이언트가 연결되지 않았습니다.');
         return null;
@@ -157,7 +157,7 @@ export const requestRandomMatch = (userId: string, onMatch: (data: any) => void)
 };
 
 // 매칭 취소
-export const cancelRandomMatch = async (userId: string) => {
+export const cancelRandomMatch = async (userId?: string) => {
     const response = await api.post(`api/random/cancel`, { userId });
     return response;
 };

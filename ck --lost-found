@@ -1,0 +1,139 @@
+[33m7e4bdf4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/admin[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32madmin[m[33m)[m HEAD@{0}: checkout: moving from chat to main
+[33m38b70ad[m[33m ([m[1;31morigin/chat[m[33m, [m[1;32mchat[m[33m)[m HEAD@{1}: checkout: moving from main to chat
+[33m7e4bdf4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/admin[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32madmin[m[33m)[m HEAD@{2}: checkout: moving from member to main
+[33m7c66b8d[m[33m ([m[1;31morigin/member[m[33m, [m[1;32mmember[m[33m)[m HEAD@{3}: checkout: moving from main to member
+[33m7e4bdf4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/admin[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32madmin[m[33m)[m HEAD@{4}: merge admin: Fast-forward
+[33m500a442[m HEAD@{5}: checkout: moving from admin to main
+[33m7e4bdf4[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/admin[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32madmin[m[33m)[m HEAD@{6}: commit: footer 수정
+[33m500a442[m HEAD@{7}: merge main: Fast-forward
+[33m0cd5526[m HEAD@{8}: checkout: moving from main to admin
+[33m500a442[m HEAD@{9}: commit: render ci 테스트
+[33mbdd92b7[m HEAD@{10}: commit: 테스트
+[33m3c23032[m HEAD@{11}: commit: 변수 이름 수정
+[33mc41bfdb[m HEAD@{12}: commit: 도커 파일 작성 및 서버 포트 변경
+[33m38b70ad[m[33m ([m[1;31morigin/chat[m[33m, [m[1;32mchat[m[33m)[m HEAD@{13}: checkout: moving from main to main
+[33m38b70ad[m[33m ([m[1;31morigin/chat[m[33m, [m[1;32mchat[m[33m)[m HEAD@{14}: merge chat: Fast-forward
+[33m5d5e739[m HEAD@{15}: checkout: moving from chat to main
+[33m38b70ad[m[33m ([m[1;31morigin/chat[m[33m, [m[1;32mchat[m[33m)[m HEAD@{16}: commit: 채팅 상대 회원 탈퇴 여부 표시 기능 추가
+[33m5d5e739[m HEAD@{17}: checkout: moving from main to chat
+[33m5d5e739[m HEAD@{18}: merge chat: Fast-forward
+[33m9ad243b[m HEAD@{19}: checkout: moving from chat to main
+[33m5d5e739[m HEAD@{20}: commit: chat css 수정
+[33m9ad243b[m HEAD@{21}: checkout: moving from chat to chat
+[33m9ad243b[m HEAD@{22}: checkout: moving from main to chat
+[33m9ad243b[m HEAD@{23}: merge chat: Fast-forward
+[33m0cd5526[m HEAD@{24}: checkout: moving from chat to main
+[33m9ad243b[m HEAD@{25}: commit (merge): 커밋
+[33mb50c6a5[m HEAD@{26}: checkout: moving from main to chat
+[33m0cd5526[m HEAD@{27}: merge admin: Fast-forward
+[33m7c66b8d[m[33m ([m[1;31morigin/member[m[33m, [m[1;32mmember[m[33m)[m HEAD@{28}: checkout: moving from admin to main
+[33m0cd5526[m HEAD@{29}: commit: 채팅방 삭제 기능 및 css 수정
+[33m7c66b8d[m[33m ([m[1;31morigin/member[m[33m, [m[1;32mmember[m[33m)[m HEAD@{30}: merge main: Fast-forward
+[33me823308[m HEAD@{31}: checkout: moving from main to admin
+[33m7c66b8d[m[33m ([m[1;31morigin/member[m[33m, [m[1;32mmember[m[33m)[m HEAD@{32}: merge member: Fast-forward
+[33m61dd1a5[m[33m ([m[1;32mlogin[m[33m)[m HEAD@{33}: checkout: moving from member to main
+[33m7c66b8d[m[33m ([m[1;31morigin/member[m[33m, [m[1;32mmember[m[33m)[m HEAD@{34}: commit: 회원 수정 및 탈퇴 기능 임시 구현
+[33m61dd1a5[m[33m ([m[1;32mlogin[m[33m)[m HEAD@{35}: checkout: moving from login to member
+[33m61dd1a5[m[33m ([m[1;32mlogin[m[33m)[m HEAD@{36}: merge main: Fast-forward
+[33me7e5e9d[m[33m ([m[1;31morigin/login[m[33m)[m HEAD@{37}: checkout: moving from main to login
+[33m61dd1a5[m[33m ([m[1;32mlogin[m[33m)[m HEAD@{38}: merge admin: Merge made by the 'ort' strategy.
+[33m9ae431f[m HEAD@{39}: checkout: moving from admin to main
+[33me823308[m HEAD@{40}: commit: admin 채팅 관리 기능 추가
+[33m6f01e4c[m HEAD@{41}: checkout: moving from chat to admin
+[33mb50c6a5[m HEAD@{42}: commit: 임시저장
+[33m9ae431f[m HEAD@{43}: checkout: moving from chat to chat
+[33m9ae431f[m HEAD@{44}: merge main: Fast-forward
+[33mf598b20[m HEAD@{45}: checkout: moving from main to chat
+[33m9ae431f[m HEAD@{46}: merge admin: Merge made by the 'ort' strategy.
+[33ma91da2f[m HEAD@{47}: checkout: moving from admin to main
+[33m6f01e4c[m HEAD@{48}: commit: 관리자 회원 조회 검색 및 정렬 창 구현
+[33m43db6a9[m HEAD@{49}: checkout: moving from main to admin
+[33ma91da2f[m HEAD@{50}: merge chat: Merge made by the 'ort' strategy.
+[33me7e5e9d[m[33m ([m[1;31morigin/login[m[33m)[m HEAD@{51}: checkout: moving from chat to main
+[33mf598b20[m HEAD@{52}: commit: chat 예외 기능 추가
+[33m43db6a9[m HEAD@{53}: checkout: moving from chat to chat
+[33m43db6a9[m HEAD@{54}: checkout: moving from admin to chat
+[33m43db6a9[m HEAD@{55}: checkout: moving from main to admin
+[33me7e5e9d[m[33m ([m[1;31morigin/login[m[33m)[m HEAD@{56}: merge login: Fast-forward
+[33m43db6a9[m HEAD@{57}: checkout: moving from login to main
+[33me7e5e9d[m[33m ([m[1;31morigin/login[m[33m)[m HEAD@{58}: commit: 로그인 alert문 수정
+[33m43db6a9[m HEAD@{59}: reset: moving to origin/main
+[33m605170c[m HEAD@{60}: checkout: moving from chat to login
+[33m43db6a9[m HEAD@{61}: checkout: moving from admin to chat
+[33m43db6a9[m HEAD@{62}: checkout: moving from login to admin
+[33m605170c[m HEAD@{63}: checkout: moving from admin to login
+[33m43db6a9[m HEAD@{64}: merge main: Fast-forward
+[33m22c171f[m[33m ([m[1;32mtemp-admin-backup[m[33m)[m HEAD@{65}: checkout: moving from main to admin
+[33m43db6a9[m HEAD@{66}: checkout: moving from admin to main
+[33m22c171f[m[33m ([m[1;32mtemp-admin-backup[m[33m)[m HEAD@{67}: checkout: moving from chat to admin
+[33m43db6a9[m HEAD@{68}: checkout: moving from main to chat
+[33m43db6a9[m HEAD@{69}: merge chat: Fast-forward
+[33m5a13d74[m HEAD@{70}: checkout: moving from chat to main
+[33m43db6a9[m HEAD@{71}: commit: 다른 페이지 이동 시, 매칭 취소 수정
+[33m5a13d74[m HEAD@{72}: checkout: moving from main to chat
+[33m5a13d74[m HEAD@{73}: checkout: moving from chat to main
+[33m5a13d74[m HEAD@{74}: checkout: moving from chat to chat
+[33m5a13d74[m HEAD@{75}: reset: moving to main
+[33m5ba4477[m HEAD@{76}: checkout: moving from main to chat
+[33m5a13d74[m HEAD@{77}: checkout: moving from admin to main
+[33m22c171f[m[33m ([m[1;32mtemp-admin-backup[m[33m)[m HEAD@{78}: reset: moving to HEAD
+[33m22c171f[m[33m ([m[1;32mtemp-admin-backup[m[33m)[m HEAD@{79}: checkout: moving from main to admin
+[33m5a13d74[m HEAD@{80}: checkout: moving from chat to main
+[33m5ba4477[m HEAD@{81}: checkout: moving from main to chat
+[33m5a13d74[m HEAD@{82}: checkout: moving from chat to main
+[33m5ba4477[m HEAD@{83}: checkout: moving from main to chat
+[33m5a13d74[m HEAD@{84}: checkout: moving from temp-admin-backup to main
+[33m22c171f[m[33m ([m[1;32mtemp-admin-backup[m[33m)[m HEAD@{85}: checkout: moving from admin to temp-admin-backup
+[33m22c171f[m[33m ([m[1;32mtemp-admin-backup[m[33m)[m HEAD@{86}: checkout: moving from main to admin
+[33m5a13d74[m HEAD@{87}: reset: moving to origin/main
+[33m5a13d74[m HEAD@{88}: reset: moving to origin/main
+[33m0457079[m HEAD@{89}: checkout: moving from main to main
+[33m0457079[m HEAD@{90}: checkout: moving from admin to main
+[33m22c171f[m[33m ([m[1;32mtemp-admin-backup[m[33m)[m HEAD@{91}: commit: 파일 구조 변경 및 css 적용
+[33m8374bb8[m HEAD@{92}: checkout: moving from admin to admin
+[33m8374bb8[m HEAD@{93}: reset: moving to 8374bb8
+[33m0457079[m HEAD@{94}: reset: moving to 0457079
+[33m8374bb8[m HEAD@{95}: reset: moving to HEAD
+[33m8374bb8[m HEAD@{96}: commit: 커밋 테스트
+[33m0457079[m HEAD@{97}: reset: moving to main
+[33m0457079[m HEAD@{98}: checkout: moving from main to admin
+[33m0457079[m HEAD@{99}: merge admin: Fast-forward
+[33md3b4b14[m HEAD@{100}: checkout: moving from admin to main
+[33m0457079[m HEAD@{101}: commit: admin 회원 조회 및 통계 임시구현
+[33md3b4b14[m HEAD@{102}: checkout: moving from admin to admin
+[33md3b4b14[m HEAD@{103}: checkout: moving from admin to admin
+[33md3b4b14[m HEAD@{104}: checkout: moving from main to admin
+[33md3b4b14[m HEAD@{105}: commit (merge): Merge branch 'chat'
+[33mfd8dfb4[m HEAD@{106}: checkout: moving from chat to main
+[33m5ba4477[m HEAD@{107}: commit: 채팅 삭제 기능 구현
+[33m605170c[m HEAD@{108}: checkout: moving from chat to chat
+[33m605170c[m HEAD@{109}: checkout: moving from main to chat
+[33mfd8dfb4[m HEAD@{110}: checkout: moving from chat to main
+[33m605170c[m HEAD@{111}: checkout: moving from main to chat
+[33mfd8dfb4[m HEAD@{112}: checkout: moving from chat to main
+[33m605170c[m HEAD@{113}: reset: moving to 605170c
+[33m75f47ef[m HEAD@{114}: checkout: moving from chat to chat
+[33m75f47ef[m HEAD@{115}: checkout: moving from chat to chat
+[33m75f47ef[m HEAD@{116}: reset: moving to HEAD~
+[33mfd8dfb4[m HEAD@{117}: checkout: moving from main to chat
+[33mfd8dfb4[m HEAD@{118}: merge chat: Fast-forward
+[33m75f47ef[m HEAD@{119}: pull origin main --rebase: Fast-forward
+[33mc400b9c[m HEAD@{120}: checkout: moving from chat to main
+[33mfd8dfb4[m HEAD@{121}: pull origin main --rebase (finish): returning to refs/heads/chat
+[33mfd8dfb4[m HEAD@{122}: pull origin main --rebase (pick): branch 변경 테스트
+[33m75f47ef[m HEAD@{123}: pull origin main --rebase (start): checkout 75f47ef3392ea86383454b89709dd56516015786
+[33m7ab9689[m HEAD@{124}: commit: branch 변경 테스트
+[33mb08e1b0[m HEAD@{125}: checkout: moving from login to chat
+[33m605170c[m HEAD@{126}: reset: moving to HEAD~
+[33m06508de[m HEAD@{127}: commit: 분기 확인 커밋
+[33m605170c[m HEAD@{128}: commit: main,css, 로그아웃 구현
+[33mb08e1b0[m HEAD@{129}: checkout: moving from chat to login
+[33mb08e1b0[m HEAD@{130}: commit: 랜덤 채팅방 생성 기능 구현
+[33mc400b9c[m HEAD@{131}: checkout: moving from main to chat
+[33mc400b9c[m HEAD@{132}: commit: accesstoken 및 refreshtoken 재발급 설정
+[33ma561017[m HEAD@{133}: commit: 채팅 목록 조회 및 대화 내역 출력 기능 추가
+[33m43c67b9[m HEAD@{134}: commit: 채팅방 기능 구현
+[33m092e01d[m HEAD@{135}: commit: chating 기능 frontend 기본 구조 구현
+[33m2727d55[m HEAD@{136}: commit: accesstoken 저장 및 alert 메시지 수정
+[33m6406a41[m HEAD@{137}: Branch: renamed refs/heads/master to refs/heads/main
+[33m6406a41[m HEAD@{139}: commit (initial): first frontend

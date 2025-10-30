@@ -2,6 +2,8 @@ import { message } from '..';
 import { useEffect, useState, useRef } from "react";
 import { connect, subscribe, disconnect, getConversation, deleteMessage } from '../../api/ChatApi';
 import { useNavigate, useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from '../../store/store';
 import '../../css/ChatRoom.css';
 
 const AdminChatRoomComponent = () => {
@@ -13,6 +15,7 @@ const AdminChatRoomComponent = () => {
     const messageEndRef = useRef<HTMLDivElement | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const prevScrollHeightRef = useRef<number>(0);
+    const { user } = useSelector((state: RootState) => state.auth);
     const navigate = useNavigate();
 
   const scrollToBottom = () => {
@@ -47,6 +50,13 @@ const AdminChatRoomComponent = () => {
     };
 
     useEffect(() => { 
+        if(user?.role!=='ADMIN')
+        {
+            alert('관리자만 접근 가능합니다.');
+            navigate(-1);
+            return;
+        }
+
         if (!memberId || !roomId || !receiver) {
             alert('잘못된 접근입니다.');
             navigate(-1);
@@ -56,7 +66,7 @@ const AdminChatRoomComponent = () => {
         setConnected(true);
 
         connect(() => {
-            subscribe(memberId, Number(roomId), (newMessage) => {
+            subscribe(Number(roomId), (newMessage) => {
                 // 삭제 타입 메시지인 경우
                 if (newMessage.type === 'DELETE') {
                     setMessages(prev => prev.filter(msg => msg.chatId !== newMessage.chatId));
@@ -67,10 +77,11 @@ const AdminChatRoomComponent = () => {
                 if (newMessage.type === 'CREATE') {
                     setMessages(prev => [...prev, newMessage]);
                 }
-            });
+            },memberId);
 
-            getConversation(memberId, receiver, 10, chatId, Number(roomId))
+            getConversation(receiver, 10, chatId, Number(roomId),memberId)
                 .then(response => {
+                    console.log(response.data.data.content);
                     setMessages(response.data.data.content.reverse());
                     setChatId(response.data.data.currentPage);
                     setTimeout(() => scrollToBottom(), 100);
@@ -100,7 +111,7 @@ const AdminChatRoomComponent = () => {
             setIsLoading(true);
             prevScrollHeightRef.current = container.scrollHeight;
 
-            getConversation(memberId!, receiver!, 10, chatId, Number(roomId))
+            getConversation( receiver!, 10, chatId, Number(roomId),memberId!)
                 .then(response => {
                     const newMessages = response.data.data.content.reverse();
                     const newChatId = response.data.data.currentPage;

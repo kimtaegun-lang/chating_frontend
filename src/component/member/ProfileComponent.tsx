@@ -1,56 +1,59 @@
 import { useEffect, useState } from "react";
-import { getUserInfo, updateMemberInfo, deleteMember } from "../../api/MemberApi";
-import '../../css/MemberList.css';
-
-interface UpdateFormData {
-  email: string;
-  phone: string;
-  addr: string;
-  currentPwd: string;
-  newPwd: string;
-  confirmPwd: string;
-}
+import { useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../../store/store";
+import { clearUser, setUser } from "../../store/authSlice";
+import { updateMemberInfo, deleteMember, validateAndGetUserInfo } from "../../api/MemberApi";
+import { updateMemberData,updateFormData } from "..";
+import '../../css/Profile.css';
 
 const ProfileComponent = () => {
-  const [member, setMember] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  
+  const { user } = useSelector((state: RootState) => state.auth);
+  
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [formData, setFormData] = useState<UpdateFormData>({
-    email: "",
-    phone: "",
-    addr: "",
+  const [formData, setFormData] = useState<updateFormData>({
+    email: user?.email || "",
+    phone: user?.phone || "",
+    addr: user?.addr || "",
     currentPwd: "",
     newPwd: "",
     confirmPwd: "",
   });
 
+  const refreshUserInfo = async () => {
+    try {
+      const res = await validateAndGetUserInfo();
+      dispatch(setUser(res.data.userInfo));
+    } catch (err) {
+      console.error("회원 정보 갱신 실패:", err);
+    }
+  };
+
   useEffect(() => {
-    setLoading(true);
-    getUserInfo()
-      .then((res) => {
-        const memberData = res.data.data;
-        setMember(memberData);
-        setFormData({
-          email: memberData.email || "",
-          phone: memberData.phone || "",
-          addr: memberData.addr || "",
-          currentPwd: "",
-          newPwd: "",
-          confirmPwd: "",
-        });
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setError("회원 정보를 불러오는데 실패했습니다.");
-        setLoading(false);
-      });
-  }, []);
+    if (!user) {
+      alert("로그인이 필요합니다.");
+      navigate("/member/signIn");
+      return;
+    }
+    
+    setFormData({
+      email: user.email || "",
+      phone: user.phone || "",
+      addr: user.addr || "",
+      currentPwd: "",
+      newPwd: "",
+      confirmPwd: "",
+    });
+  }, [user, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev: updateFormData) => ({
       ...prev,
       [name]: value
     }));
@@ -69,7 +72,9 @@ const ProfileComponent = () => {
     }
 
     try {
-      const updateData: any = {
+      setLoading(true);
+      
+      const updateData: updateMemberData = {
         email: formData.email,
         phone: formData.phone,
         addr: formData.addr,
@@ -82,12 +87,11 @@ const ProfileComponent = () => {
 
       await updateMemberInfo(updateData);
       alert("회원 정보가 수정되었습니다.");
+      
+      await refreshUserInfo();
+      
       setIsEditing(false);
-      
-      const res = await getUserInfo();
-      setMember(res.data.data);
-      
-      setFormData(prev => ({
+      setFormData((prev: updateFormData) => ({
         ...prev,
         currentPwd: "",
         newPwd: "",
@@ -96,6 +100,8 @@ const ProfileComponent = () => {
     } catch (err: any) {
       console.error(err);
       alert(err.response?.data?.message || "회원 정보 수정에 실패했습니다.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,9 +113,11 @@ const ProfileComponent = () => {
     try {
       await deleteMember();
       alert("회원 탈퇴가 완료되었습니다.");
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      window.location.href = "/login";
+      
+      dispatch(clearUser());
+      localStorage.clear();
+      
+      navigate("/member/signIn");
     } catch (err: any) {
       console.error(err);
       alert(err.response?.data?.message || "회원 탈퇴에 실패했습니다.");
@@ -131,234 +139,193 @@ const ProfileComponent = () => {
   }
 
   if (error) return <div className="error-text">{error}</div>;
-  if (!member) return <div className="error-text">회원 정보를 찾을 수 없습니다.</div>;
+  if (!user) return <div className="error-text">회원 정보를 찾을 수 없습니다.</div>;
 
   return (
-    <div className="main-container">
-      <div className="main-content">
-        <h2 className="main-title">👤 내 프로필</h2>
-        
-        {!isEditing ? (
-          <>
-            <table className="member-table">
-              <tbody>
-                <tr>
-                  <th className="column-name">아이디</th>
-                  <td>{member.memId}</td>
-                </tr>
-                <tr>
-                  <th className="column-name">이름</th>
-                  <td>{member.name}</td>
-                </tr>
-                <tr>
-                  <th className="column-name">이메일</th>
-                  <td>{member.email}</td>
-                </tr>
-                <tr>
-                  <th className="column-name">전화번호</th>
-                  <td>{member.phone}</td>
-                </tr>
-                <tr>
-                  <th className="column-name">주소</th>
-                  <td>{member.addr}</td>
-                </tr>
-                <tr>
-                  <th className="column-name">생년월일</th>
-                  <td>{member.birth}</td>
-                </tr>
-                <tr>
-                  <th className="column-name">성별</th>
-                  <td>{member.gender === "MALE" ? "남성" : "여성"}</td>
-                </tr>
-                <tr>
-                  <th className="column-name">권한</th>
-                  <td>
-                    <span className={`role-badge ${member.role === "ADMIN" ? "role-admin" : "role-user"}`}>
-                      {member.role}
-                    </span>
-                  </td>
-                </tr>
-                <tr>
-                  <th className="column-name">상태</th>
-                  <td>{member.status ?? "ACTIVE"}</td>
-                </tr>
-                <tr>
-                  <th className="column-name">가입일</th>
-                  <td>{new Date(member.createdAt).toLocaleDateString()}</td>
-                </tr>
-              </tbody>
-            </table>
-            
-            <div style={{ marginTop: "20px", textAlign: "center" }}>
-              <button 
-                onClick={() => setIsEditing(true)}
-                style={{
-                  padding: "10px 20px",
-                  marginRight: "10px",
-                  backgroundColor: "#4CAF50",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer"
-                }}
-              >
-                정보 수정
-              </button>
-              <button 
-                onClick={handleDelete}
-                style={{
-                  padding: "10px 20px",
-                  backgroundColor: "#f44336",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer"
-                }}
-              >
-                회원 탈퇴
-              </button>
-            </div>
-          </>
-        ) : (
-          <>
-            <table className="member-table">
-              <tbody>
-                <tr>
-                  <th className="column-name">아이디</th>
-                  <td>{member.memId}</td>
-                </tr>
-                <tr>
-                  <th className="column-name">이름</th>
-                  <td>{member.name}</td>
-                </tr>
-                <tr>
-                  <th className="column-name">이메일</th>
-                  <td>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      style={{ width: "100%", padding: "8px" }}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="column-name">전화번호</th>
-                  <td>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      style={{ width: "100%", padding: "8px" }}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="column-name">주소</th>
-                  <td>
-                    <input
-                      type="text"
-                      name="addr"
-                      value={formData.addr}
-                      onChange={handleInputChange}
-                      style={{ width: "100%", padding: "8px" }}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="column-name">현재 비밀번호</th>
-                  <td>
-                    <input
-                      type="password"
-                      name="currentPwd"
-                      value={formData.currentPwd}
-                      onChange={handleInputChange}
-                      placeholder="비밀번호 변경 시 입력"
-                      style={{ width: "100%", padding: "8px" }}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="column-name">새 비밀번호</th>
-                  <td>
-                    <input
-                      type="password"
-                      name="newPwd"
-                      value={formData.newPwd}
-                      onChange={handleInputChange}
-                      placeholder="변경하지 않으려면 비워두세요"
-                      style={{ width: "100%", padding: "8px" }}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="column-name">새 비밀번호 확인</th>
-                  <td>
-                    <input
-                      type="password"
-                      name="confirmPwd"
-                      value={formData.confirmPwd}
-                      onChange={handleInputChange}
-                      placeholder="새 비밀번호 확인"
-                      style={{ width: "100%", padding: "8px" }}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="column-name">생년월일</th>
-                  <td>{member.birth}</td>
-                </tr>
-                <tr>
-                  <th className="column-name">성별</th>
-                  <td>{member.gender === "MALE" ? "남성" : "여성"}</td>
-                </tr>
-              </tbody>
-            </table>
-            
-            <div style={{ marginTop: "20px", textAlign: "center" }}>
-              <button 
-                onClick={handleUpdate}
-                style={{
-                  padding: "10px 20px",
-                  marginRight: "10px",
-                  backgroundColor: "#2196F3",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer"
-                }}
-              >
-                저장
-              </button>
-              <button 
-                onClick={() => {
-                  setIsEditing(false);
-                  setFormData({
-                    email: member.email || "",
-                    phone: member.phone || "",
-                    addr: member.addr || "",
-                    currentPwd: "",
-                    newPwd: "",
-                    confirmPwd: "",
-                  });
-                }}
-                style={{
-                  padding: "10px 20px",
-                  backgroundColor: "#9E9E9E",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer"
-                }}
-              >
-                취소
-              </button>
-            </div>
-          </>
-        )}
-      </div>
+    <div className="profile-container">
+      <h2 className="profile-title">👤 내 프로필</h2>
+      
+      {!isEditing ? (
+        <>
+          <table className="profile-table">
+            <tbody>
+              <tr>
+                <th>아이디</th>
+                <td>{user.memId}</td>
+              </tr>
+              <tr>
+                <th>이름</th>
+                <td>{user.name}</td>
+              </tr>
+              <tr>
+                <th>이메일</th>
+                <td>{user.email}</td>
+              </tr>
+              <tr>
+                <th>전화번호</th>
+                <td>{user.phone}</td>
+              </tr>
+              <tr>
+                <th>주소</th>
+                <td>{user.addr}</td>
+              </tr>
+              <tr>
+                <th>생년월일</th>
+                <td>{user.birth}</td>
+              </tr>
+              <tr>
+                <th>성별</th>
+                <td>{user.gender === "MALE" ? "남성" : "여성"}</td>
+              </tr>
+              <tr>
+                <th>권한</th>
+                <td>
+                  <span className={`role-badge ${user.role === "ADMIN" ? "role-admin" : "role-user"}`}>
+                    {user.role}
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th>상태</th>
+                <td>{user.status ?? "ACTIVE"}</td>
+              </tr>
+              <tr>
+                <th>가입일</th>
+                <td>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div className="button-container">
+            <button className="btn btn-edit" onClick={() => setIsEditing(true)}>
+              정보 수정
+            </button>
+            <button className="btn btn-delete" onClick={handleDelete}>
+              회원 탈퇴
+            </button>
+          </div>
+        </>
+      ) : (
+        <>
+          <table className="profile-table">
+            <tbody>
+              <tr>
+                <th>아이디</th>
+                <td>{user.memId}</td>
+              </tr>
+              <tr>
+                <th>이름</th>
+                <td>{user.name}</td>
+              </tr>
+              <tr>
+                <th>이메일</th>
+                <td>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="profile-input"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>전화번호</th>
+                <td>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="profile-input"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>주소</th>
+                <td>
+                  <input
+                    type="text"
+                    name="addr"
+                    value={formData.addr}
+                    onChange={handleInputChange}
+                    className="profile-input"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>현재 비밀번호</th>
+                <td>
+                  <input
+                    type="password"
+                    name="currentPwd"
+                    value={formData.currentPwd}
+                    onChange={handleInputChange}
+                    placeholder="비밀번호 변경 시 입력"
+                    className="profile-input"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>새 비밀번호</th>
+                <td>
+                  <input
+                    type="password"
+                    name="newPwd"
+                    value={formData.newPwd}
+                    onChange={handleInputChange}
+                    placeholder="변경하지 않으려면 비워두세요"
+                    className="profile-input"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>새 비밀번호 확인</th>
+                <td>
+                  <input
+                    type="password"
+                    name="confirmPwd"
+                    value={formData.confirmPwd}
+                    onChange={handleInputChange}
+                    placeholder="새 비밀번호 확인"
+                    className="profile-input"
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>생년월일</th>
+                <td>{user.birth}</td>
+              </tr>
+              <tr>
+                <th>성별</th>
+                <td>{user.gender === "MALE" ? "남성" : "여성"}</td>
+              </tr>
+            </tbody>
+          </table>
+          
+          <div className="button-container">
+            <button className="btn btn-save" onClick={handleUpdate}>
+              저장
+            </button>
+            <button 
+              className="btn btn-cancel"
+              onClick={() => {
+                setIsEditing(false);
+                setFormData({
+                  email: user.email || "",
+                  phone: user.phone || "",
+                  addr: user.addr || "",
+                  currentPwd: "",
+                  newPwd: "",
+                  confirmPwd: "",
+                });
+              }}
+            >
+              취소
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 };

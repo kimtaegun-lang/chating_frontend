@@ -49,12 +49,7 @@ const SignInComponent = () => {
 
         signIn(userData)
             .then((res) => {
-                alert(res.data.message);
-                localStorage.setItem('accessToken', res.data.data.accessToken);
-               localStorage.setItem('refreshToken', res.data.data.refreshToken);
-               localStorage.setItem('memId', res.data.data.memId);
-             localStorage.setItem('name', res.data.data.name);
-             localStorage.setItem('role',res.data.data.role);
+                alert(res.data);
              navigate('/');
             })
             .catch((err) => {

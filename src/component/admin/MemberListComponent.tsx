@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import '../../css/MemberList.css';
 import SearchComponent from '../common/SearchComponent';
 import PageComponent from '../common/PageComponent';
+import { useSelector } from "react-redux";
+import { RootState } from '../../store/store';
 import { searchOptions } from '..';
 
 const MemberListComponent = () => {
@@ -13,6 +15,7 @@ const MemberListComponent = () => {
     const [totalPages, setTotalPages] = useState<number>(0);
     const [totalElements, setTotalElements] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
+     const { user } = useSelector((state: RootState) => state.auth);
     const [searchOptions, setSearchOptions] = useState<searchOptions>({
         search: "",
         searchType: "",
@@ -23,6 +26,16 @@ const MemberListComponent = () => {
     // 클라이언트 사이드 정렬 상태
     const [clientSort, setClientSort] = useState<{ field: string, order: 'asc' | 'desc' } | null>(null);
 
+     // 초기 로딩
+    useEffect(() => {
+        if(user?.role!=='ADMIN')
+        {
+            alert('관리자만 접근 가능합니다.');
+            navigate(-1);
+            return;
+        }
+        fetchMembers(0);
+    }, []);
 
     const onSearchClick = () => {
         setCurrentPage(0);
@@ -132,10 +145,7 @@ const MemberListComponent = () => {
         }
     };
 
-    // 초기 로딩
-    useEffect(() => {
-        fetchMembers(0);
-    }, []);
+   
 
     if (loading) {
         return (
@@ -192,7 +202,7 @@ const MemberListComponent = () => {
                                 </th>
                                 <th>성별</th>
                                 <th>권한</th>
-                                <th>상태</th> {/* 추가 */}
+                                <th>상태</th> 
                                 <th
                                     onClick={() => handleClientSort('createdAt')}
                                     style={{ cursor: 'pointer', userSelect: 'none' }}
@@ -214,7 +224,7 @@ const MemberListComponent = () => {
                                             {member.role}
                                         </span>
                                     </td>
-                                    <td> {/* 추가 */}
+                                    <td> 
                                         <span className={`status-badge ${member.status === 'ACTIVE' ? 'status-active' : 'status-banned'}`}>
                                             {member.status === 'ACTIVE' ? '활성' : '정지'}
                                         </span>

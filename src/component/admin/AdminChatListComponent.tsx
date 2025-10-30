@@ -3,15 +3,24 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getMyChatRooms } from '../../api/ChatApi';
 import { deleteRoom } from '../../api/AdminApi';
 import { chatRoom } from '..';
+import { useSelector } from "react-redux";
+import { RootState } from '../../store/store';
 import '../../css/ChatList.css';
 
 const AdminChatListComponent = () => {
     const [chatRooms, setChatRooms] = useState<chatRoom[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const { user } = useSelector((state: RootState) => state.auth);
     const { memberId } = useParams<{ memberId: string }>();
 
     useEffect(() => {
+        if(user?.role!=='ADMIN')
+        {
+            alert('관리자만 접근 가능합니다.');
+            navigate(-1);
+            return;
+        }
         if (!memberId) {
             alert('회원 정보가 없습니다.');
             navigate(-1);

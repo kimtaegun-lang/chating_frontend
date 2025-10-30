@@ -40,12 +40,6 @@ export const deleteMember = async (memberId: string) => {
     return response;
 }
 
-// 통계 조회 (추가)
-export const getStatistics = async () => {
-    const response = await api.get(`${admin}/statistics`);
-    return response;
-}
-
 // 채팅방 삭제
 export const deleteRoom=async (roomId: number) => {
     console.log(`${admin}/members/deleteRoom/${roomId}`);

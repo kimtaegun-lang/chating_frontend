@@ -2,25 +2,27 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyChatRooms } from '../../api/ChatApi';
 import { chatRoom } from '..';
+import { useSelector } from "react-redux";
+import { RootState } from '../../store/store';
 import '../../css/ChatList.css';
 
 const ChatListComponent = () => {
     const [chatRooms, setChatRooms] = useState<chatRoom[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const loginUserId = localStorage.getItem('memId') || '';
+    const {isLoggedIn, user } = useSelector((state: RootState) => state.auth);
 
     useEffect(() => {
-        if (!loginUserId) {
+        if (!isLoggedIn) {
             alert('로그인이 필요합니다.');
             navigate('../../member/signIn');
             return;
         }
         fetchChatRooms();
-    }, [loginUserId]);
+    }, [user?.memId]);
 
     const fetchChatRooms = async () => {
-        getMyChatRooms(loginUserId)
+        getMyChatRooms(user?.memId)
             .then((response) => {
                 console.log(response.data.message);
                 setChatRooms(response.data.data);
@@ -84,7 +86,7 @@ const ChatListComponent = () => {
             <div className="chat-list-header">
                 <div className="header-content">
                     <h2 className="chat-list-title">💬 채팅 목록</h2>
-                    <p className="chat-list-subtitle">{loginUserId}님의 대화 내역</p>
+                    <p className="chat-list-subtitle">{user?.memId}님의 대화 내역</p>
                 </div>
                 <div className="chat-stats">
                     <div className="stat-item">

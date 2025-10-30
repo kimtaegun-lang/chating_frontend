@@ -1,37 +1,29 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../store/store";
+import { setUser, clearUser } from "../store/authSlice";
+import { validateAndGetUserInfo } from "../api/MemberApi";
+import '../css/Page.css';
 
 const MainComponent = () => {
     const navigate = useNavigate();
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const username=localStorage.getItem("name");
+    const dispatch = useDispatch();
+    
+    const { isLoggedIn, user } = useSelector((state: RootState) => state.auth);
 
-    // 페이지 포커스될 때마다 체크 (로그아웃 반영)
     useEffect(() => {
-        const checkLoginStatus = () => {
-            const token = localStorage.getItem('accessToken');
-            const name = localStorage.getItem('userName');
-
-            if (token) {
-                setIsLoggedIn(true);
-            } else {
-                setIsLoggedIn(false);
+        const checkAuth = async () => {
+            try {
+                const response = await validateAndGetUserInfo();
+                console.log("회원 정보 확인 완료");
+                dispatch(setUser(response.data.userInfo));
+            } catch (err) {
+                console.log("회원 인증 실패");
+               // dispatch(clearUser());
             }
         };
-
-        // 초기 체크
-        checkLoginStatus();
-
-        // storage 이벤트 리스너 (다른 탭에서 로그아웃 시)
-        window.addEventListener('storage', checkLoginStatus);
-        
-        // 페이지 포커스 시 체크
-        window.addEventListener('focus', checkLoginStatus);
-
-        return () => {
-            window.removeEventListener('storage', checkLoginStatus);
-            window.removeEventListener('focus', checkLoginStatus);
-        };
+        checkAuth();
     }, []);
 
     return (
@@ -41,7 +33,9 @@ const MainComponent = () => {
 
                 {isLoggedIn ? (
                     <div className="user-section">
-                        <p className="welcome-text">환영합니다, <span className="username">{username}</span>님!</p>
+                        <p className="welcome-text">
+                            환영합니다, <span className="username">{user?.name}</span>님!
+                        </p>
 
                         <div className="button-group">
                             <button

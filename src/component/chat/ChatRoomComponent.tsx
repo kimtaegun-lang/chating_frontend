@@ -2,19 +2,20 @@ import { message } from '..';
 import { useEffect, useState, useRef } from "react";
 import { connect, subscribe, sendMessage, disconnect, getConversation, deleteMessage, getReceiverStatus } from '../../api/ChatApi';
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { RootState } from '../../store/store';
 import '../../css/ChatRoom.css';
 
 const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: string }) => {
     const [messages, setMessages] = useState<message[]>([]);
     const [input, setInput] = useState('');
-    const [connected, setConnected] = useState(false);
     const [chatId, setChatId] = useState<number>(0);
     const [isLoading, setIsLoading] = useState(false);
-    const loginUserId = localStorage.getItem('memId') || "";
     const messageEndRef = useRef<HTMLDivElement | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const prevScrollHeightRef = useRef<number>(0);
     const [isReceiverActive, setIsReceiverActive] = useState<boolean>();
+    const {isLoggedIn, user } = useSelector((state: RootState) => state.auth);
     const navigate = useNavigate();
 
     const scrollToBottom = () => {
@@ -50,7 +51,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     const handleSend = async () => {
         if (input.trim()) {
             try {
-                sendMessage(loginUserId, receiver, input, roomId);
+                sendMessage(receiver, input, roomId,user?.memId);
             }
             catch (error: any) {
                 console.log(error.data.message);
@@ -60,7 +61,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     };
 
     useEffect(() => {
-        if (!loginUserId) {
+        if (!isLoggedIn) {
             alert('로그인이 필요합니다.');
             navigate('../../member/signIn');
             return;
@@ -72,13 +73,9 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
         }).catch(error => {
             console.error('회원 상태 조회 실패:', error);
         });
-
-        if (isReceiverActive) {
-            setConnected(true);
-        }
         connect(() => {
 
-            subscribe(loginUserId, roomId, (newMessage) => {
+            subscribe( roomId, (newMessage) => {
 
                 // 삭제 타입 메시지인 경우
                 if (newMessage.type === 'DELETE') {
@@ -87,12 +84,12 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                 }
 
                 // 일반 메시지인 경우
-                if (newMessage.sender !== loginUserId || newMessage.type === 'CREATE') {
+                if (newMessage.sender !== user?.memId || newMessage.type === 'CREATE') {
                     setMessages(prev => [...prev, newMessage]);
                 }
-            });
+            },user?.memId);
 
-            getConversation(loginUserId, receiver, 10, chatId, roomId).then(response => {
+            getConversation(receiver, 10, chatId, roomId,user?.memId).then(response => {
                 console.log(response.data.data);
                 setMessages(response.data.data.content.reverse());
                 setChatId(response.data.data.currentPage);
@@ -122,7 +119,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
             setIsLoading(true);
             prevScrollHeightRef.current = container.scrollHeight;
 
-            getConversation(loginUserId, receiver, 10, chatId, roomId).then(response => {
+            getConversation(receiver, 10, chatId, roomId,user?.memId).then(response => {
                 const newMessages = response.data.data.content.reverse();
                 const newChatId = response.data.data.currentPage;
 
@@ -163,7 +160,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                     </div>
                 )}
                 {messages.map((msg, idx) => {
-                    const isMine = msg.sender === loginUserId;
+                    const isMine = msg.sender === user?.memId;
                     return (
                         <div
                             key={idx}
@@ -204,7 +201,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                 />
                 <button
                     onClick={handleSend}
-                    disabled={!connected}
+                     disabled={!isReceiverActive}
                     className="chatroom-send-btn"
                 >
                     전송

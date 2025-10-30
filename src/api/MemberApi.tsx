@@ -2,6 +2,7 @@ import axios from "axios";
 import { serverPort } from "./RootApi";
 import { userInfo,signInData } from "../component";
 import { api } from './RootApi';
+import { updateMemberData } from "../component";
 const member = `${serverPort}/member`;
 
 // 회원가입
@@ -15,9 +16,10 @@ export const signUp = async (formData: userInfo) => {
 }
 
 // 로그인
-export const signIn=async(formData:signInData)=> {
-    const response=await axios.post(member+"/signIn",formData,{
-        headers:{"Content-Type":"application/json"}
+export const signIn = async (formData: signInData) => {
+    const response = await axios.post(member + "/signIn", formData, {
+        headers: { "Content-Type": "application/json" },
+        withCredentials: true   
     });
     return response;
 }
@@ -35,19 +37,18 @@ export const getUserInfo=async()=> {
 }
 
 // 회원 정보 수정
-export const updateMemberInfo = async (updateData: {
-    email?: string;
-    phone?: string;
-    addr?: string;
-    currentPwd?: string;
-    newPwd?: string;
-}) => {
-    const response = await api.put(member + "/updateMemberInfo", updateData);
+export const updateMemberInfo = async (updateData: updateMemberData) => {
+    const response = await api.put(`${member}/updateMemberInfo`, updateData);
     return response;
 }
-
 // 회원 탈퇴
 export const deleteMember = async () => {
     const response = await api.delete(member + "/deleteMember");
     return response;
 }
+
+// 회원 인증 및 회원 정보 조회
+export const validateAndGetUserInfo = async () => {
+    const response = await api.get(`${member}/auth/check`);
+    return response;
+};

@@ -3,59 +3,47 @@ import axios, { AxiosError } from 'axios';
 const serverPort = process.env.REACT_APP_SERVER_PORT;
 
 const api = axios.create({
-    baseURL: serverPort
-});
-console.log("서버 포트:", serverPort);
-// http 요청 인터셉터 설정 api를 사용해서 요청할 때마다 토큰을 헤더에 포함
-api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
+    baseURL: serverPort,
+    withCredentials: true
 });
 
-// http 응답 인터셉터 설정  토큰 만료 시 재발급 로직
+console.log("서버 포트:", serverPort);
+
+// http 응답 인터셉터 설정 - 토큰 만료 시 재발급 로직
 api.interceptors.response.use(
     response => response,
     async (error: AxiosError) => {
         const originalRequest = error.config as any;
-        
         const errorData = error.response?.data as { error?: string; message?: string };
         
-         if (error.response?.status === 401 && !originalRequest._retry) {
+        // refresh 요청 자체가 실패한 경우는 처리하지 않음 (무한 루프 방지)
+        if (originalRequest.url?.includes('/api/refresh')) {
+            return Promise.reject(error);
+        }
+        
+        // 401 에러이고 아직 재시도하지 않은 경우
+        if (error.response?.status === 401 && !originalRequest._retry) {
             const errorCode = errorData?.error;
             
-            // TOKEN_EXPIRED 또는 INVALID_TOKEN 모두 재발급 시도
+            // TOKEN_EXPIRED 또는 INVALID_TOKEN인 경우 재발급 시도
             if (errorCode === 'TOKEN_EXPIRED' || errorCode === 'INVALID_TOKEN') {
                 originalRequest._retry = true;
-            
-            const refreshToken = localStorage.getItem('refreshToken');
-            
-            if (!refreshToken) {
-                console.log("Refresh Token 없음");
-                localStorage.clear();
-                window.location.href = '../member/signIn';
-                return Promise.reject(error);
-            }
-
-            try {
-                const result = await axios.post(`${serverPort}/api/refresh`, { refreshToken });
                 
-                if (result.data.accessToken) {
-                    localStorage.setItem('accessToken', result.data.accessToken);
-                    originalRequest.headers.Authorization = `Bearer ${result.data.accessToken}`;
+                try {
+                    await api.post('/api/refresh');
                     console.log("토큰 재발급 완료");
-                    return axios(originalRequest);
-                }
-            } catch (refreshError) {
-                if (axios.isAxiosError(refreshError) && refreshError.response?.status === 403) {
-                    console.error("Refresh Token 만료");
+                    return api(originalRequest); // 원래 요청 재시도
+                } catch (refreshError) {
+                    console.error("Refresh Token 만료 또는 재발급 실패");
                     alert('세션이 만료되었습니다. 다시 로그인해주세요.');
-                    localStorage.clear();
-                    window.location.href = '../member/signIn';
-                }
-                return Promise.reject(refreshError);
+                    
+                    // 로그인 페이지로 리다이렉트
+                    setTimeout(() => {
+                        window.location.href = '/member/signIn';
+                    }, 100);
+                    
+                    // pending 상태로 유지 (무한 루프 방지)
+                    return new Promise(() => {});
                 }
             }
         }
