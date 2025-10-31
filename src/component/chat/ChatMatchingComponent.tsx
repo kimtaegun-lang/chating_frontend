@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StompSubscription } from '@stomp/stompjs';
 import { connect, requestRandomMatch, cancelRandomMatch, disconnect } from '../../api/ChatApi';
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from '../../store/authSlice';
 import { RootState } from '../../store/store';
 import '../../css/ChatMatching.css';
 
@@ -10,19 +11,21 @@ const ChatMatchingComponent = () => {
     const [isMatching, setIsMatching] = useState(false);
     const isMatchingRef = useRef(false);
     const [message, setMessage] = useState('');
-    const navigate = useNavigate();
     const subscriptionRef = useRef<StompSubscription | null>(null);
     const hasStartedRef = useRef(false);
-    const isConnectedRef = useRef(false);  // ← 연결 상태 추적
+    const isConnectedRef = useRef(false); 
     const {isLoggedIn, user } = useSelector((state: RootState) => state.auth);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     useEffect(() => {
-        // 컴포넌트 마운트 시 WebSocket 연결 (세션 기반 로그인도 인정)
-        const stored = sessionStorage.getItem('userInfo');
-        const sessionUser = stored ? JSON.parse(stored) : null;
-        const effectiveIsLoggedIn = isLoggedIn || !!sessionUser;
-
-        if (!isConnectedRef.current && effectiveIsLoggedIn) {
+       if (!user) {
+            const storedUser = sessionStorage.getItem('userInfo');
+            if (storedUser) {
+                dispatch(setUser(JSON.parse(storedUser)));
+            }
+        }
+        if (!isConnectedRef.current && isLoggedIn) {
             console.log("=== WebSocket 연결 시작 ===");
             connect(() => {
                 console.log('WebSocket 연결 완료');
@@ -31,7 +34,7 @@ const ChatMatchingComponent = () => {
                 // 연결 후 자동 매칭 시작
                 if (!hasStartedRef.current) {
                     hasStartedRef.current = true;
-                    startMatchingRequest();  // ← 연결 없이 매칭만 요청
+                    startMatchingRequest();  
                 }
             });
         }
@@ -54,16 +57,12 @@ const ChatMatchingComponent = () => {
 
     
     const startMatching = () => {
-        const stored = sessionStorage.getItem('userInfo');
-        const sessionUser = stored ? JSON.parse(stored) : null;
-        const effectiveIsLoggedIn = isLoggedIn || !!sessionUser;
-        if (!effectiveIsLoggedIn) {
+
+        if (!isLoggedIn) {
             alert('로그인이 필요합니다.');
             navigate('../../member/signIn');
             return;
         }
-
-        console.log("=== 매칭 시작 버튼 클릭 ===");
         
         // 이미 연결되어 있으면 바로 매칭 요청
         if (isConnectedRef.current) {
@@ -85,10 +84,6 @@ const ChatMatchingComponent = () => {
         isMatchingRef.current = true;
         setMessage('매칭 대기 중...');
         
-        console.log("=== 매칭 요청 전송 ===");
-        const stored = sessionStorage.getItem('userInfo');
-        const sessionUser = stored ? JSON.parse(stored) : null;
-        const effectiveUser = user ?? sessionUser;
         const subscription = requestRandomMatch((data) => {
             if (data.matched) {
                 const { roomId, receiver } = data;
@@ -120,7 +115,7 @@ const ChatMatchingComponent = () => {
             } else {
                 setMessage(data.message || '매칭 대기 중...');
             }
-        }, effectiveUser?.memId);
+        }, user?.memId);
         
         if (subscription) {
             subscriptionRef.current = subscription;
@@ -138,10 +133,7 @@ const ChatMatchingComponent = () => {
             }
             
             // 서버에 취소 요청
-            const stored = sessionStorage.getItem('userInfo');
-            const sessionUser = stored ? JSON.parse(stored) : null;
-            const effectiveUser = user ?? sessionUser;
-            await cancelRandomMatch(effectiveUser?.memId);
+            await cancelRandomMatch(user?.memId);
             
             setIsMatching(false);
             isMatchingRef.current = false;

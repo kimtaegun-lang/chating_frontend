@@ -17,29 +17,22 @@ const AdminChatListComponent = () => {
     const { memberId } = useParams<{ memberId: string }>();
 
     useEffect(() => {
-        if (!user) {
+
+         if (!user) {
             const storedUser = sessionStorage.getItem('userInfo');
             if (storedUser) {
                 dispatch(setUser(JSON.parse(storedUser)));
             }
         }
-    }, [user, dispatch]);
 
-    useEffect(() => {
-        if (!user) return; 
-
-        if (user.role !== 'ADMIN') {
+        if (user?.role !== 'ADMIN') {
             alert('관리자만 접근 가능합니다.');
             navigate(-1);
             return;
         }
-        if (!memberId) {
-            alert('회원 정보가 없습니다.');
-            navigate(-1);
-            return;
-        }
+    
         fetchChatRooms();
-    }, [user, memberId, navigate]);
+    }, []);
 
     const fetchChatRooms = async () => {
         try {

@@ -2,15 +2,31 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { serverPort, api } from './RootApi';
 import { StompSubscription } from '@stomp/stompjs';
-
 let stompClient: Client | null = null;
 let reconnectAttempts = 0;
 const MAX_RECONNECT_ATTEMPTS = 3;
 const chat = `${serverPort}/api/chat`;
 let currentOnConnect: (() => void) | null = null;
 
-export const connect = (onConnect: () => void) => {
+export const connect = async (onConnect: () => void) => {
     currentOnConnect = onConnect;
+    
+    // 연결 전에 토큰 갱신 (쿠키 최신화)
+    try {
+        await api.post('/api/refresh');
+        
+        // 쿠키 반영 대기
+        await new Promise(resolve => setTimeout(resolve, 500));
+    } catch (error: any) {
+        if (error.response?.status === 403) {
+             handleSessionExpired();
+        }
+        else {
+            console.error('토큰 갱신 실패:', error);
+            handleSessionExpired();
+            return;
+        }
+    }
     
     stompClient = new Client({
         webSocketFactory: () => new SockJS(`${serverPort}/ws-chat`),
@@ -68,6 +84,7 @@ const handleTokenRefreshAndReconnect = async () => {
         await api.post('/api/refresh');
         console.log('액세스 토큰 재발급 완료');
         
+        // 쿠키가 브라우저에 완전히 저장될 때까지 충분히 대기
         console.log('쿠키 반영 대기 중...');
         await new Promise(resolve => setTimeout(resolve, 1500));
         
@@ -157,6 +174,11 @@ export const disconnect = () => {
         stompClient.deactivate();
         console.log('WebSocket 연결 종료');
     }
+};
+
+// WebSocket 연결 상태 확인
+export const isConnected = (): boolean => {
+    return stompClient?.connected || false;
 };
 
 // 본인 채팅방 목록 조회

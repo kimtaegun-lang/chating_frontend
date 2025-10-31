@@ -12,8 +12,7 @@ const ProfileComponent = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { user } = useSelector((state: RootState) => state.auth);
-
+   const { isLoggedIn, user } = useSelector((state: RootState) => state.auth);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -36,20 +35,23 @@ const ProfileComponent = () => {
   };
 
   useEffect(() => {
-    const stored = sessionStorage.getItem('userInfo');
-    const sessionUser = stored ? JSON.parse(stored) : null;
-    const effectiveUser = user ?? sessionUser;
+   if (!user) {
+            const storedUser = sessionStorage.getItem('userInfo');
+            if (storedUser) {
+                dispatch(setUser(JSON.parse(storedUser)));
+            }
+        }
 
-    if (!effectiveUser) {
-      alert("로그인이 필요합니다.");
-      navigate("/member/signIn");
-      return;
-    }
+        if (!isLoggedIn) {
+            alert('로그인이 필요합니다.');
+            navigate('../../member/signIn');
+            return;
+        }
 
     setFormData({
-      email: effectiveUser.email || "",
-      phone: effectiveUser.phone || "",
-      addr: effectiveUser.addr || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      addr: user?.addr || "",
       currentPwd: "",
       newPwd: "",
       confirmPwd: "",
@@ -269,7 +271,7 @@ const ProfileComponent = () => {
                       name="currentPwd"
                       value={formData.currentPwd}
                       onChange={handleInputChange}
-                      placeholder="비밀번호 변경 시 입력"
+                      placeholder="현재 비밀번호"
                       className="profile-input"
                     />
                   </td>
@@ -282,7 +284,7 @@ const ProfileComponent = () => {
                       name="newPwd"
                       value={formData.newPwd}
                       onChange={handleInputChange}
-                      placeholder="변경하지 않으려면 비워두세요"
+                      placeholder="새 비밀번호"
                       className="profile-input"
                     />
                   </td>

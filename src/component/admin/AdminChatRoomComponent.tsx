@@ -2,7 +2,8 @@ import { message } from '..';
 import { useEffect, useState, useRef } from "react";
 import { connect, subscribe, disconnect, getConversation, deleteMessage } from '../../api/ChatApi';
 import { useNavigate, useParams } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from '../../store/authSlice';
 import { RootState } from '../../store/store';
 import '../../css/ChatRoom.css';
 
@@ -17,6 +18,7 @@ const AdminChatRoomComponent = () => {
     const prevScrollHeightRef = useRef<number>(0);
     const { user } = useSelector((state: RootState) => state.auth);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
   const scrollToBottom = () => {
     if (scrollContainerRef.current) {
@@ -50,12 +52,14 @@ const AdminChatRoomComponent = () => {
     };
 
     useEffect(() => { 
-        const stored = sessionStorage.getItem('userInfo');
-        const sessionUser = stored ? JSON.parse(stored) : null;
-        const effectiveUser = user ?? sessionUser;
+     if (!user) {
+                const storedUser = sessionStorage.getItem('userInfo');
+                if (storedUser) {
+                    dispatch(setUser(JSON.parse(storedUser)));
+                }
+            }
 
-        if (!effectiveUser) return;
-        if(effectiveUser.role!=='ADMIN')
+        if(user?.role !== 'ADMIN')
         {
             alert('관리자만 접근 가능합니다.');
             navigate(-1);
@@ -100,7 +104,7 @@ const AdminChatRoomComponent = () => {
         return () => {
             disconnect();
         }; 
-    }, [user, navigate, memberId, roomId, receiver]);
+    }, []);
 
     // 새 메시지 도착 시 스크롤 하단으로
     useEffect(() => {

@@ -2,28 +2,34 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyChatRooms } from '../../api/ChatApi';
 import { chatRoom } from '..';
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from '../../store/authSlice';
 import { RootState } from '../../store/store';
 import '../../css/ChatList.css';
 
 const ChatListComponent = () => {
     const [chatRooms, setChatRooms] = useState<chatRoom[]>([]);
     const [loading, setLoading] = useState(true);
+    const { isLoggedIn, user } = useSelector((state: RootState) => state.auth);
     const navigate = useNavigate();
-    const {isLoggedIn, user } = useSelector((state: RootState) => state.auth);
+    const dispatch = useDispatch();
+
 
     useEffect(() => {
-        const stored = sessionStorage.getItem('userInfo');
-        const sessionUser = stored ? JSON.parse(stored) : null;
-        const effectiveIsLoggedIn = isLoggedIn || !!sessionUser;
-        const effectiveUser = user ?? sessionUser;
+        if (!user) {
+            const storedUser = sessionStorage.getItem('userInfo');
+            if (storedUser) {
+                dispatch(setUser(JSON.parse(storedUser)));
+            }
+        }
 
-        if (!effectiveIsLoggedIn || !effectiveUser) {
+        if (!isLoggedIn) {
             alert('로그인이 필요합니다.');
             navigate('../../member/signIn');
             return;
         }
-        fetchChatRooms(effectiveUser.memId);
+        
+        fetchChatRooms(user?.memId);
     }, [isLoggedIn, user?.memId, navigate]);
 
     const fetchChatRooms = async (memId?: string) => {
@@ -50,11 +56,11 @@ const ChatListComponent = () => {
         const now = new Date();
         const diff = now.getTime() - date.getTime();
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        
+
         if (days === 0) return '오늘';
         if (days === 1) return '어제';
         if (days < 7) return `${days}일 전`;
-        
+
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
@@ -65,11 +71,11 @@ const ChatListComponent = () => {
         const date = new Date(dateString);
         const now = new Date();
         const diff = now.getTime() - date.getTime();
-        
+
         const minutes = Math.floor(diff / (1000 * 60));
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        
+
         if (minutes < 60) return `${minutes}분 전`;
         if (hours < 24) return `${hours}시간 전`;
         return `${days}일 전`;

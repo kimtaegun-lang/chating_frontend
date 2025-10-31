@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { getMembers, updateMemberStatus,deleteMember } from "../../api/AdminApi";
+import { getMembers, updateMemberStatus, deleteMember } from "../../api/AdminApi";
 import { useNavigate } from 'react-router-dom';
 import '../../css/MemberList.css';
 import SearchComponent from '../common/SearchComponent';
 import PageComponent from '../common/PageComponent';
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setUser } from '../../store/authSlice';
 import { RootState } from '../../store/store';
 import { searchOptions } from '..';
 
 const MemberListComponent = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [members, setMembers] = useState<any[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(0);
     const [totalElements, setTotalElements] = useState<number>(0);
     const [loading, setLoading] = useState<boolean>(false);
-     const { user } = useSelector((state: RootState) => state.auth);
+    const { user } = useSelector((state: RootState) => state.auth);
     const [searchOptions, setSearchOptions] = useState<searchOptions>({
         search: "",
         searchType: "",
@@ -28,18 +30,20 @@ const MemberListComponent = () => {
 
     // 초기 로딩 (세션 값으로 즉시 판정)
     useEffect(() => {
-        const stored = sessionStorage.getItem('userInfo');
-        const sessionUser = stored ? JSON.parse(stored) : null;
-        const effectiveUser = user ?? sessionUser;
+        if (!user) {
+            const storedUser = sessionStorage.getItem('userInfo');
+            if (storedUser) {
+                dispatch(setUser(JSON.parse(storedUser)));
+            }
+        }
 
-        if (!effectiveUser) return;
-        if (effectiveUser.role !== 'ADMIN') {
+        if (user?.role !== 'ADMIN') {
             alert('관리자만 접근 가능합니다.');
             navigate(-1);
             return;
         }
         fetchMembers(0);
-    }, [user, navigate]);
+    }, []);
 
     const onSearchClick = () => {
         setCurrentPage(0);
@@ -149,7 +153,7 @@ const MemberListComponent = () => {
         }
     };
 
-   
+
 
     if (loading) {
         return (
@@ -206,7 +210,7 @@ const MemberListComponent = () => {
                                 </th>
                                 <th>성별</th>
                                 <th>권한</th>
-                                <th>상태</th> 
+                                <th>상태</th>
                                 <th
                                     onClick={() => handleClientSort('createdAt')}
                                     style={{ cursor: 'pointer', userSelect: 'none' }}
@@ -228,7 +232,7 @@ const MemberListComponent = () => {
                                             {member.role}
                                         </span>
                                     </td>
-                                    <td> 
+                                    <td>
                                         <span className={`status-badge ${member.status === 'ACTIVE' ? 'status-active' : 'status-banned'}`}>
                                             {member.status === 'ACTIVE' ? '활성' : '정지'}
                                         </span>
