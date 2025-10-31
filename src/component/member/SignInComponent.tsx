@@ -32,46 +32,49 @@ const SignInComponent = () => {
     };
 
 
-    //  form 제출
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        const newError: { [key: string]: string } = {};
+    e.preventDefault();
+    const newError: { [key: string]: string } = {};
 
-        // 유효성 검사
-        if (userData.memId === "") {
-            newError.memId = "아이디를 입력해 주세요.";
+    // 유효성 검사
+    if (userData.memId === "") {
+        newError.memId = "아이디를 입력해 주세요.";
+    }
+
+    if (userData.pwd === "") {
+        newError.pwd = "비밀번호를 입력해 주세요.";
+    }
+
+    if (Object.keys(newError).length > 0) {
+        setError(newError);
+        return;
+    }
+
+    try {
+        const res = await signIn(userData);
+        alert(res.data);
+        
+        // 5초 대기
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        
+        // 사용자 정보 조회
+        try {
+            const info = await validateAndGetUserInfo();
+            const userInfo = info.data.userInfo;
+            dispatch(setUser(userInfo));
+            sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
+        } catch (e) {
+            console.error('사용자 정보 조회 실패:', e);
         }
-
-        if (userData.pwd === "") {
-            newError.pwd = "비밀번호를 입력해 주세요.";
-        }
-
-        if (Object.keys(newError).length > 0) {
-            setError(newError);
-            return;
-        }
-
-        signIn(userData)
-            .then(async (res) => {
-                alert(res.data); // 쿠키 설정을 위한 대기
-        await new Promise(resolve => setTimeout(resolve, 10000));
-                // 로그인 성공 후, 서버에서 쿠키 설정이 완료되었을 때 사용자 정보 동기화
-                try {
-                    const info = await validateAndGetUserInfo();
-                    const userInfo = info.data.userInfo;
-                    dispatch(setUser(userInfo));
-                    sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
-                } catch (e) {
-                    // 사용자 정보 동기화 실패 시에도 일단 메인으로 이동 (비로그인 UI 노출)
-                }
-                navigate('/');
-            })
-            .catch((err) => {
-                alert(err.response.data);
-            });
-        setError({});
-    }; 
-
+        
+        navigate('/');
+        
+    } catch (err: any) {
+        alert(err.response?.data || '로그인에 실패했습니다.');
+    }
+    
+    setError({});
+};
 
 
     return (
