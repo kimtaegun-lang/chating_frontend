@@ -30,7 +30,8 @@ const SignInComponent = () => {
             }));
         }
     };
-/*
+
+    
     //  form 제출
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -68,38 +69,8 @@ const SignInComponent = () => {
                 alert(err.response.data);
             });
         setError({});
-    }; */
+    }; 
 
-    const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const newError: { [key: string]: string } = {};
-
-    if (!userData.memId) newError.memId = "아이디를 입력해 주세요.";
-    if (!userData.pwd) newError.pwd = "비밀번호를 입력해 주세요.";
-    if (Object.keys(newError).length > 0) {
-        setError(newError);
-        return;
-    }
-
-    try {
-        const res = await signIn(userData); // 로그인 요청
-        alert(res.data);
-
-        // Render 무료 서버 환경에서 쿠키 반영 딜레이 고려
-        await new Promise(r => setTimeout(r, 100)); // 100ms 정도 기다림
-
-        const info = await validateAndGetUserInfo(); // 쿠키 적용 후 사용자 정보 조회
-        const userInfo = info.data.userInfo;
-        dispatch(setUser(userInfo));
-        sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
-
-        navigate('/');
-    } catch (err: any) {
-        alert(err.response?.data || "로그인 실패");
-    } finally {
-        setError({});
-    }
-};
 
 
     return (
