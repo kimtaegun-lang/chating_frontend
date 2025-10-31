@@ -31,7 +31,7 @@ const SignInComponent = () => {
         }
     };
 
-    
+
     //  form 제출
     const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -53,7 +53,8 @@ const SignInComponent = () => {
 
         signIn(userData)
             .then(async (res) => {
-                alert(res.data);
+                alert(res.data); // 쿠키 설정을 위한 대기
+        await new Promise(resolve => setTimeout(resolve, 10000));
                 // 로그인 성공 후, 서버에서 쿠키 설정이 완료되었을 때 사용자 정보 동기화
                 try {
                     const info = await validateAndGetUserInfo();
