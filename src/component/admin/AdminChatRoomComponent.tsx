@@ -50,7 +50,12 @@ const AdminChatRoomComponent = () => {
     };
 
     useEffect(() => { 
-        if(user?.role!=='ADMIN')
+        const stored = sessionStorage.getItem('userInfo');
+        const sessionUser = stored ? JSON.parse(stored) : null;
+        const effectiveUser = user ?? sessionUser;
+
+        if (!effectiveUser) return;
+        if(effectiveUser.role!=='ADMIN')
         {
             alert('관리자만 접근 가능합니다.');
             navigate(-1);
@@ -95,7 +100,7 @@ const AdminChatRoomComponent = () => {
         return () => {
             disconnect();
         }; 
-    }, []);
+    }, [user, navigate, memberId, roomId, receiver]);
 
     // 새 메시지 도착 시 스크롤 하단으로
     useEffect(() => {

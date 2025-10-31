@@ -13,16 +13,21 @@ const ChatListComponent = () => {
     const {isLoggedIn, user } = useSelector((state: RootState) => state.auth);
 
     useEffect(() => {
-        if (!isLoggedIn) {
+        const stored = sessionStorage.getItem('userInfo');
+        const sessionUser = stored ? JSON.parse(stored) : null;
+        const effectiveIsLoggedIn = isLoggedIn || !!sessionUser;
+        const effectiveUser = user ?? sessionUser;
+
+        if (!effectiveIsLoggedIn || !effectiveUser) {
             alert('로그인이 필요합니다.');
             navigate('../../member/signIn');
             return;
         }
-        fetchChatRooms();
-    }, [user?.memId]);
+        fetchChatRooms(effectiveUser.memId);
+    }, [isLoggedIn, user?.memId, navigate]);
 
-    const fetchChatRooms = async () => {
-        getMyChatRooms(user?.memId)
+    const fetchChatRooms = async (memId?: string) => {
+        getMyChatRooms(memId ?? user?.memId)
             .then((response) => {
                 console.log(response.data.message);
                 setChatRooms(response.data.data);

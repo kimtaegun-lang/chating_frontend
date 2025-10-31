@@ -1,30 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
-import { setUser, clearUser } from "../store/authSlice";
-import { validateAndGetUserInfo } from "../api/MemberApi";
 import '../css/Page.css';
 
 const MainComponent = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    
     const { isLoggedIn, user } = useSelector((state: RootState) => state.auth);
-
-    useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                const response = await validateAndGetUserInfo();
-                console.log("회원 정보 확인 완료");
-                dispatch(setUser(response.data.userInfo));
-            } catch (err) {
-                console.log("회원 인증 실패");
-               // dispatch(clearUser());
-            }
-        };
-        checkAuth();
-    }, []);
+    
 
     return (
         <div className="main-container">

@@ -24,12 +24,12 @@ const Root = createBrowserRouter([
             {
                 path: "admin",
                 children: AdminRouter()
+            },
+            {
+                path: "member",
+                children: MemberRouter()
             }
         ]
-    },
-    {
-        path: "member",
-        children: MemberRouter()
     }
 ]);
 

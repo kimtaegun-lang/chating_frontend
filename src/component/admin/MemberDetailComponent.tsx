@@ -12,13 +12,17 @@ const MemberDetailComponent = ({ memberId }: { memberId: string }) => {
    const { user } = useSelector((state: RootState) => state.auth);
   const navigate=useNavigate();
   useEffect(() => {
+    const stored = sessionStorage.getItem('userInfo');
+    const sessionUser = stored ? JSON.parse(stored) : null;
+    const effectiveUser = user ?? sessionUser;
 
-    if(user?.role!=='ADMIN')
-        {
-            alert('관리자만 접근 가능합니다.');
-            navigate(-1);
-            return;
-        }
+    if (!effectiveUser) return;
+    if(effectiveUser.role!=='ADMIN')
+    {
+        alert('관리자만 접근 가능합니다.');
+        navigate(-1);
+        return;
+    }
 
     if (!memberId) return;
 
@@ -33,7 +37,7 @@ const MemberDetailComponent = ({ memberId }: { memberId: string }) => {
         setError("회원 정보를 불러오는데 실패했습니다.");
         setLoading(false);
       });
-  }, [memberId]);
+  }, [user, memberId, navigate]);
 
   if (loading) {
     return (

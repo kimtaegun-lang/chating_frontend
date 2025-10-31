@@ -3,7 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getMyChatRooms } from '../../api/ChatApi';
 import { deleteRoom } from '../../api/AdminApi';
 import { chatRoom } from '..';
-import { useSelector } from "react-redux";
+import { setUser } from '../../store/authSlice';
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from '../../store/store';
 import '../../css/ChatList.css';
 
@@ -11,12 +12,23 @@ const AdminChatListComponent = () => {
     const [chatRooms, setChatRooms] = useState<chatRoom[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const { user } = useSelector((state: RootState) => state.auth);
     const { memberId } = useParams<{ memberId: string }>();
 
     useEffect(() => {
-        if(user?.role!=='ADMIN')
-        {
+        if (!user) {
+            const storedUser = sessionStorage.getItem('userInfo');
+            if (storedUser) {
+                dispatch(setUser(JSON.parse(storedUser)));
+            }
+        }
+    }, [user, dispatch]);
+
+    useEffect(() => {
+        if (!user) return; 
+
+        if (user.role !== 'ADMIN') {
             alert('관리자만 접근 가능합니다.');
             navigate(-1);
             return;
@@ -27,7 +39,7 @@ const AdminChatListComponent = () => {
             return;
         }
         fetchChatRooms();
-    }, [memberId]);
+    }, [user, memberId, navigate]);
 
     const fetchChatRooms = async () => {
         try {
@@ -48,7 +60,7 @@ const AdminChatListComponent = () => {
 
     const handleDeleteRoom = async (e: React.MouseEvent, roomId: number) => {
         e.stopPropagation();
-        
+
         if (!window.confirm('정말 이 채팅방을 삭제하시겠습니까?')) {
             return;
         }
@@ -67,11 +79,11 @@ const AdminChatListComponent = () => {
         const now = new Date();
         const diff = now.getTime() - date.getTime();
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        
+
         if (days === 0) return '오늘';
         if (days === 1) return '어제';
         if (days < 7) return `${days}일 전`;
-        
+
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
@@ -82,11 +94,11 @@ const AdminChatListComponent = () => {
         const date = new Date(dateString);
         const now = new Date();
         const diff = now.getTime() - date.getTime();
-        
+
         const minutes = Math.floor(diff / (1000 * 60));
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-        
+
         if (minutes < 60) return `${minutes}분 전`;
         if (hours < 24) return `${hours}시간 전`;
         return `${days}일 전`;

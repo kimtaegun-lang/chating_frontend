@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { signInData } from '..';
 import { useNavigate } from "react-router-dom";
-import { signIn } from "../../api/MemberApi";
+import { signIn, validateAndGetUserInfo } from "../../api/MemberApi";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../store/authSlice";
 
 const SignInComponent = () => {
     const [userData, setUserData] = useState<signInData>({
@@ -11,6 +13,7 @@ const SignInComponent = () => {
 
     const [error, setError] = useState<{ [key: string]: string }>({}); // 에러 메시지
     const navigate = useNavigate(); // 페이지 이동 훅
+    const dispatch = useDispatch();
 
     //  input 변화 감지
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -48,12 +51,21 @@ const SignInComponent = () => {
         }
 
         signIn(userData)
-            .then((res) => {
+            .then(async (res) => {
                 alert(res.data);
-             navigate('/');
+                // 로그인 성공 후, 서버에서 쿠키 설정이 완료되었을 때 사용자 정보 동기화
+                try {
+                    const info = await validateAndGetUserInfo();
+                    const userInfo = info.data.userInfo;
+                    dispatch(setUser(userInfo));
+                    sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
+                } catch (e) {
+                    // 사용자 정보 동기화 실패 시에도 일단 메인으로 이동 (비로그인 UI 노출)
+                }
+                navigate('/');
             })
             .catch((err) => {
-             alert(err.response.data);
+                alert(err.response.data);
             });
         setError({});
     };

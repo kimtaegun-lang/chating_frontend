@@ -26,16 +26,20 @@ const MemberListComponent = () => {
     // 클라이언트 사이드 정렬 상태
     const [clientSort, setClientSort] = useState<{ field: string, order: 'asc' | 'desc' } | null>(null);
 
-     // 초기 로딩
+    // 초기 로딩 (세션 값으로 즉시 판정)
     useEffect(() => {
-        if(user?.role!=='ADMIN')
-        {
+        const stored = sessionStorage.getItem('userInfo');
+        const sessionUser = stored ? JSON.parse(stored) : null;
+        const effectiveUser = user ?? sessionUser;
+
+        if (!effectiveUser) return;
+        if (effectiveUser.role !== 'ADMIN') {
             alert('관리자만 접근 가능합니다.');
             navigate(-1);
             return;
         }
         fetchMembers(0);
-    }, []);
+    }, [user, navigate]);
 
     const onSearchClick = () => {
         setCurrentPage(0);

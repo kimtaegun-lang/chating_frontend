@@ -51,7 +51,10 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     const handleSend = async () => {
         if (input.trim()) {
             try {
-                sendMessage(receiver, input, roomId,user?.memId);
+                const stored = sessionStorage.getItem('userInfo');
+                const sessionUser = stored ? JSON.parse(stored) : null;
+                const effectiveUser = user ?? sessionUser;
+                sendMessage(receiver, input, roomId, effectiveUser?.memId);
             }
             catch (error: any) {
                 console.log(error.data.message);
@@ -61,7 +64,12 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     };
 
     useEffect(() => {
-        if (!isLoggedIn) {
+        const stored = sessionStorage.getItem('userInfo');
+        const sessionUser = stored ? JSON.parse(stored) : null;
+        const effectiveIsLoggedIn = isLoggedIn || !!sessionUser;
+        const effectiveUser = user ?? sessionUser;
+
+        if (!effectiveIsLoggedIn) {
             alert('로그인이 필요합니다.');
             navigate('../../member/signIn');
             return;
@@ -84,12 +92,12 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                 }
 
                 // 일반 메시지인 경우
-                if (newMessage.sender !== user?.memId || newMessage.type === 'CREATE') {
+                if (newMessage.sender !== effectiveUser?.memId || newMessage.type === 'CREATE') {
                     setMessages(prev => [...prev, newMessage]);
                 }
-            },user?.memId);
+            },effectiveUser?.memId);
 
-            getConversation(receiver, 10, chatId, roomId,user?.memId).then(response => {
+            getConversation(receiver, 10, chatId, roomId,effectiveUser?.memId).then(response => {
                 console.log(response.data.data);
                 setMessages(response.data.data.content.reverse());
                 setChatId(response.data.data.currentPage);
@@ -119,7 +127,10 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
             setIsLoading(true);
             prevScrollHeightRef.current = container.scrollHeight;
 
-            getConversation(receiver, 10, chatId, roomId,user?.memId).then(response => {
+            const stored = sessionStorage.getItem('userInfo');
+            const sessionUser = stored ? JSON.parse(stored) : null;
+            const effectiveUser = user ?? sessionUser;
+            getConversation(receiver, 10, chatId, roomId, effectiveUser?.memId).then(response => {
                 const newMessages = response.data.data.content.reverse();
                 const newChatId = response.data.data.currentPage;
 

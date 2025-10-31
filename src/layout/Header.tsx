@@ -26,8 +26,8 @@ const Header = () => {
                 alert(response.data);
                 // Redux 상태 초기화
                 dispatch(clearUser());
-                // localStorage도 정리
-                localStorage.clear();
+                // 저장소 정리
+                sessionStorage.removeItem('userInfo');
                 navigate('/');
             })
             .catch((error) => {
