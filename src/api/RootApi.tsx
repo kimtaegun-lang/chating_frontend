@@ -7,7 +7,7 @@ const api = axios.create({
     withCredentials: true
 });
 
-
+console.log("서버 포트:", serverPort);
 
 // http 응답 인터셉터 설정 - 토큰 만료 시 재발급 로직
 api.interceptors.response.use(
