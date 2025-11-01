@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { getMembers, updateMemberStatus, deleteMember } from "../../api/AdminApi";
 import { useNavigate } from 'react-router-dom';
 import '../../css/MemberList.css';
+import Loading from '../../common/Loading';
 import SearchComponent from '../common/SearchComponent';
 import PageComponent from '../common/PageComponent';
 import { useSelector, useDispatch } from "react-redux";
@@ -156,17 +157,7 @@ const MemberListComponent = () => {
 
 
     if (loading) {
-        return (
-            <div className="loading-overlay">
-                <div className="loading-content">
-                    <div className="spinner-container">
-                        <div className="spinner"></div>
-                        <div className="spinner-inner"></div>
-                    </div>
-                    <p className="loading-text">로딩 중...</p>
-                </div>
-            </div>
-        );
+        <Loading/>
     }
 
     const sortedMembers = getSortedMembers();

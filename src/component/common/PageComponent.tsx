@@ -1,5 +1,6 @@
 import React from 'react';
 import '../../css/Page.css';
+import { current } from '@reduxjs/toolkit';
 
 const PageComponent = ({
   currentPage,

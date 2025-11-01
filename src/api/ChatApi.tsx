@@ -182,10 +182,13 @@ export const isConnected = (): boolean => {
 };
 
 // 본인 채팅방 목록 조회
-export const getMyChatRooms = async (userId?: string) => {
+export const getMyChatRooms = async (pageCount:number,size:number,userId?: string) => {
     const response = await api.get(`${chat}/chatRooms`, {
-        params: { userId }
-    });
+        params:{
+        userId,
+        size,
+        pageCount
+    }});
     return response;
 };
 

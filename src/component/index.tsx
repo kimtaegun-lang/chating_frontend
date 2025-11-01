@@ -29,7 +29,7 @@ export interface chatRoom { // 채팅방
     createdAt: string;
 }
 
-export interface searchOptions {
+export interface searchOptions { // 검색 옵션
     search: string,
      searchType:string,
      sort:string,

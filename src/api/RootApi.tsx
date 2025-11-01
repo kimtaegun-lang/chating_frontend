@@ -24,9 +24,6 @@ api.interceptors.response.use(
         // 401 에러이고 아직 재시도하지 않은 경우
         if (error.response?.status === 401 && !originalRequest._retry) {
             const errorCode = errorData?.error;
-            
-            // TOKEN_EXPIRED 또는 INVALID_TOKEN인 경우 재발급 시도
-            if (errorCode === 'TOKEN_EXPIRED' || errorCode === 'INVALID_TOKEN') {
                 originalRequest._retry = true;
                 
                 try {
@@ -46,7 +43,7 @@ api.interceptors.response.use(
                     return new Promise(() => {});
                 }
             }
-        }
+        
         
         return Promise.reject(error);
     }

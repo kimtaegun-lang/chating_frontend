@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setUser } from '../../store/authSlice';
 import { RootState } from '../../store/store';
+import Loading from '../../common/Loading';
 import '../../css/ChatRoom.css';
 
 const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: string }) => {
@@ -166,10 +167,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                 className="chatroom-messages"
             >
                 {isLoading && (
-                    <div className="chatroom-loading">
-                        <div className="loading-spinner"></div>
-                        <span>로딩 중...</span>
-                    </div>
+                   <Loading/>
                 )}
                 {messages.map((msg, idx) => {
                     const isMine = msg.sender === user?.memId;

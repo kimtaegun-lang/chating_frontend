@@ -59,8 +59,8 @@ const SignInComponent = () => {
                     const userInfo = info.data.userInfo;
                     dispatch(setUser(userInfo));
                     sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
-                } catch (e) {
-                    // 사용자 정보 동기화 실패 시에도 일단 메인으로 이동 (비로그인 UI 노출)
+                } catch (e:any) {
+                    alert(e.data);
                 }
                 navigate('/');
             })

@@ -5,6 +5,7 @@ import { RootState } from "../../store/store";
 import { clearUser, setUser } from "../../store/authSlice";
 import { updateMemberInfo, deleteMember, validateAndGetUserInfo } from "../../api/MemberApi";
 import { updateMemberData, updateFormData } from "..";
+import Loading from '../../common/Loading';
 import '../../css/Profile.css';
 import '../../css/MemberList.css';
 
@@ -132,17 +133,7 @@ const ProfileComponent = () => {
   };
 
   if (loading) {
-    return (
-      <div className="loading-overlay">
-        <div className="loading-content">
-          <div className="spinner-container">
-            <div className="spinner"></div>
-            <div className="spinner-inner"></div>
-          </div>
-          <p className="loading-text">로딩 중...</p>
-        </div>
-      </div>
-    );
+    <Loading/>
   }
 
   if (error) return <div className="error-text">{error}</div>;

@@ -5,6 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setUser } from '../../store/authSlice';
 import { RootState } from '../../store/store';
+import Loading from '../../common/Loading';
 import '../../css/ChatRoom.css';
 
 const AdminChatRoomComponent = () => {
@@ -168,10 +169,7 @@ const AdminChatRoomComponent = () => {
                 className="chatroom-messages"
             >
                 {isLoading && (
-                    <div className="chatroom-loading">
-                        <div className="loading-spinner"></div>
-                        <span>이전 메시지 불러오는 중...</span>
-                    </div>
+                    <Loading/>
                 )}
                 {messages.map((msg, idx) => {
                     // memberId가 보낸 메시지는 좌측, receiver가 보낸 메시지는 우측

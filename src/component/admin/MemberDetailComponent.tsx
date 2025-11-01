@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { setUser } from '../../store/authSlice';
 import { RootState } from '../../store/store';
+import Loading from '../../common/Loading';
 import '../../css/MemberList.css';
 
 const MemberDetailComponent = ({ memberId }: { memberId: string }) => {
@@ -43,17 +44,7 @@ const MemberDetailComponent = ({ memberId }: { memberId: string }) => {
   }, []);
 
   if (loading) {
-    return (
-      <div className="loading-overlay">
-        <div className="loading-content">
-          <div className="spinner-container">
-            <div className="spinner"></div>
-            <div className="spinner-inner"></div>
-          </div>
-          <p className="loading-text">로딩 중...</p>
-        </div>
-      </div>
-    );
+    <Loading/>
   }
 
   if (error) return <div className="error-text">{error}</div>;
