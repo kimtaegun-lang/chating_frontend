@@ -2,9 +2,6 @@ import { message } from '..';
 import { useEffect, useState, useRef } from "react";
 import { connect, subscribe, sendMessage, disconnect, getConversation, deleteMessage, getReceiverStatus } from '../../api/ChatApi';
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { setUser } from '../../store/authSlice';
-import { RootState } from '../../store/store';
 import Loading from '../../common/Loading';
 import '../../css/ChatRoom.css';
 
@@ -17,9 +14,8 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const prevScrollHeightRef = useRef<number>(0);
     const [isReceiverActive, setIsReceiverActive] = useState<boolean>();
-    const { isLoggedIn, user } = useSelector((state: RootState) => state.auth);
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
 
     const scrollToBottom = () => {
         if (scrollContainerRef.current) {
@@ -54,7 +50,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     const handleSend = async () => {
         if (input.trim()) {
             try {
-                sendMessage(receiver, input, roomId, user?.memId);
+                sendMessage(receiver, input, roomId, userInfo.memId);
             }
             catch (error: any) {
                 console.log(error.data.message);
@@ -64,14 +60,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     };
 
     useEffect(() => {
-        if (!user) {
-            const storedUser = sessionStorage.getItem('userInfo');
-            if (storedUser) {
-                dispatch(setUser(JSON.parse(storedUser)));
-            }
-        }
-
-        if (!isLoggedIn) {
+        if (!userInfo) {
             alert('로그인이 필요합니다.');
             navigate('../../member/signIn');
             return;
@@ -94,12 +83,12 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                 }
 
                 // 일반 메시지인 경우
-                if (newMessage.sender !== user?.memId || newMessage.type === 'CREATE') {
+                if (newMessage.sender !== userInfo.memId || newMessage.type === 'CREATE') {
                     setMessages(prev => [...prev, newMessage]);
                 }
-            }, user?.memId);
+            }, userInfo.memId);
 
-            getConversation(receiver, 10, chatId, roomId, user?.memId).then(response => {
+            getConversation(receiver, 10, chatId, roomId, userInfo.memId).then(response => {
                 console.log(response.data.data);
                 setMessages(response.data.data.content.reverse());
                 setChatId(response.data.data.currentPage);
@@ -131,7 +120,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
 
             const stored = sessionStorage.getItem('userInfo');
             const sessionUser = stored ? JSON.parse(stored) : null;
-            const effectiveUser = user ?? sessionUser;
+            const effectiveUser = userInfo ?? sessionUser;
             getConversation(receiver, 10, chatId, roomId, effectiveUser?.memId).then(response => {
                 const newMessages = response.data.data.content.reverse();
                 const newChatId = response.data.data.currentPage;
@@ -170,7 +159,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                    <Loading/>
                 )}
                 {messages.map((msg, idx) => {
-                    const isMine = msg.sender === user?.memId;
+                    const isMine = msg.sender === userInfo.memId;
                     return (
                         <div
                             key={idx}

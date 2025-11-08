@@ -2,8 +2,6 @@ import { useState } from "react";
 import { signInData } from "..";
 import { useNavigate } from "react-router-dom";
 import { signIn, validateAndGetUserInfo } from "../../api/MemberApi";
-import { useDispatch } from "react-redux";
-import { setUser } from "../../store/authSlice";
 import "../../css/SignIn.css";
 
 const SignInComponent = () => {
@@ -14,7 +12,7 @@ const SignInComponent = () => {
 
     const [error, setError] = useState<{ [key: string]: string }>({});
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -43,7 +41,6 @@ const SignInComponent = () => {
                 try {
                     const info = await validateAndGetUserInfo();
                     const userInfo = info.data.userInfo;
-                    dispatch(setUser(userInfo));
                     sessionStorage.setItem("userInfo", JSON.stringify(userInfo));
                 } catch (e: any) {
                     alert(e.data);

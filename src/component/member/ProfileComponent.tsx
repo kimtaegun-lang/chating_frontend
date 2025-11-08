@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "../../store/store";
-import { clearUser, setUser } from "../../store/authSlice";
 import { updateMemberInfo, deleteMember, validateAndGetUserInfo } from "../../api/MemberApi";
 import { updateMemberData, updateFormData } from "..";
 import Loading from '../../common/Loading';
@@ -11,53 +8,37 @@ import '../../css/MemberList.css';
 
 const ProfileComponent = () => {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-   const { isLoggedIn, user } = useSelector((state: RootState) => state.auth);
+  const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [formData, setFormData] = useState<updateFormData>({
-    email: user?.email || "",
-    phone: user?.phone || "",
-    addr: user?.addr || "",
+    email: userInfo?.email || "",
+    phone: userInfo?.phone || "",
+    addr: userInfo?.addr || "",
     currentPwd: "",
     newPwd: "",
     confirmPwd: "",
   });
 
-  const refreshUserInfo = async () => {
-    try {
-      const res = await validateAndGetUserInfo();
-      dispatch(setUser(res.data.userInfo));
-    } catch (err) {
-      console.error("회원 정보 갱신 실패:", err);
-    }
-  };
 
   useEffect(() => {
-   if (!user) {
-            const storedUser = sessionStorage.getItem('userInfo');
-            if (storedUser) {
-                dispatch(setUser(JSON.parse(storedUser)));
-            }
-        }
 
-        if (!isLoggedIn) {
+        if (!userInfo) {
             alert('로그인이 필요합니다.');
             navigate('../../member/signIn');
             return;
         }
 
     setFormData({
-      email: user?.email || "",
-      phone: user?.phone || "",
-      addr: user?.addr || "",
+      email: userInfo.email || "",
+      phone: userInfo.phone || "",
+      addr: userInfo.addr || "",
       currentPwd: "",
       newPwd: "",
       confirmPwd: "",
     });
-  }, [user, navigate]);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -96,7 +77,6 @@ const ProfileComponent = () => {
       await updateMemberInfo(updateData);
       alert("회원 정보가 수정되었습니다.");
 
-      await refreshUserInfo();
 
       setIsEditing(false);
       setFormData((prev: updateFormData) => ({
@@ -121,9 +101,7 @@ const ProfileComponent = () => {
     try {
       await deleteMember();
       alert("회원 탈퇴가 완료되었습니다.");
-
-      dispatch(clearUser());
-      localStorage.clear();
+      sessionStorage.clear();
 
       navigate("/member/signIn");
     } catch (err: any) {
@@ -137,7 +115,7 @@ const ProfileComponent = () => {
   }
 
   if (error) return <div className="error-text">{error}</div>;
-  if (!user) return <div className="error-text">회원 정보를 찾을 수 없습니다.</div>;
+  if (!userInfo) return <div className="error-text">회원 정보를 찾을 수 없습니다.</div>;
 
   return (
     <div className="main-container">
@@ -151,47 +129,47 @@ const ProfileComponent = () => {
               <tbody>
                 <tr>
                   <th className="column-name">아이디</th>
-                  <td>{user.memId}</td>
+                  <td>{userInfo.memId}</td>
                 </tr>
                 <tr>
                   <th className="column-name">이름</th>
-                  <td>{user.name}</td>
+                  <td>{userInfo.name}</td>
                 </tr>
                 <tr>
                   <th className="column-name">이메일</th>
-                  <td>{user.email}</td>
+                  <td>{userInfo.email}</td>
                 </tr>
                 <tr>
                   <th className="column-name">전화번호</th>
-                  <td>{user.phone}</td>
+                  <td>{userInfo.phone}</td>
                 </tr>
                 <tr>
                   <th className="column-name">주소</th>
-                  <td>{user.addr}</td>
+                  <td>{userInfo.addr}</td>
                 </tr>
                 <tr>
                   <th className="column-name">생년월일</th>
-                  <td>{user.birth}</td>
+                  <td>{userInfo.birth}</td>
                 </tr>
                 <tr>
                   <th className="column-name">성별</th>
-                  <td>{user.gender === "MALE" ? "남성" : "여성"}</td>
+                  <td>{userInfo.gender === "MALE" ? "남성" : "여성"}</td>
                 </tr>
                 <tr>
                   <th className="column-name">권한</th>
                   <td>
 
-                    {user.role}
+                    {userInfo.role}
 
                   </td>
                 </tr>
                 <tr>
                   <th className="column-name">상태</th>
-                  <td>{user.status ?? "ACTIVE"}</td>
+                  <td>{userInfo.status ?? "ACTIVE"}</td>
                 </tr>
                 <tr>
                   <th className="column-name">가입일</th>
-                  <td>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}</td>
+                  <td>{userInfo.createdAt ? new Date(userInfo.createdAt).toLocaleDateString() : "-"}</td>
                 </tr>
               </tbody>
           </table>
@@ -212,11 +190,11 @@ const ProfileComponent = () => {
               <tbody>
                 <tr>
                   <th className="column-name">아이디</th>
-                  <td>{user.memId}</td>
+                  <td>{userInfo.memId}</td>
                 </tr>
                 <tr>
                   <th className="column-name">이름</th>
-                  <td>{user.name}</td>
+                  <td>{userInfo.name}</td>
                 </tr>
                 <tr>
                   <th className="column-name">이메일</th>
@@ -295,11 +273,11 @@ const ProfileComponent = () => {
                 </tr>
                 <tr>
                   <th className="column-name">생년월일</th>
-                  <td>{user.birth}</td>
+                  <td>{userInfo.birth}</td>
                 </tr>
                 <tr>
                   <th className="column-name">성별</th>
-                  <td>{user.gender === "MALE" ? "남성" : "여성"}</td>
+                  <td>{userInfo.gender === "MALE" ? "남성" : "여성"}</td>
                 </tr>
               </tbody>
           </table>
@@ -312,9 +290,9 @@ const ProfileComponent = () => {
                 onClick={() => {
                   setIsEditing(false);
                   setFormData({
-                    email: user.email || "",
-                    phone: user.phone || "",
-                    addr: user.addr || "",
+                    email: userInfo.email || "",
+                    phone: userInfo.phone || "",
+                    addr: userInfo.addr || "",
                     currentPwd: "",
                     newPwd: "",
                     confirmPwd: "",

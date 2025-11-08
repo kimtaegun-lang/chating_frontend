@@ -1,31 +1,22 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { signOut } from "../api/MemberApi";
-import { RootState } from "../store/store";
-import { useSelector, useDispatch } from "react-redux";
-import { clearUser } from "../store/authSlice";
 import '../css/Header.css'
 
 const Header = () => {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    
-    // Redux에서 상태 가져오기
-    const { isLoggedIn, user } = useSelector((state: RootState) => state.auth);
-    
+    const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
     const [showDropdown, setShowDropdown] = useState(false);
     const [showAdminDropdown, setShowAdminDropdown] = useState(false);
     
     // user 객체에서 정보 추출
-    const isAdmin = user?.role === 'ADMIN';
-    const username = user?.name;
+    const isAdmin = userInfo?.role === 'ADMIN';
+    const username = userInfo?.name;
 
     const handleLogout = () => {
         signOut()
             .then((response) => {
                 alert(response.data);
-                // Redux 상태 초기화
-                dispatch(clearUser());
                 // 저장소 정리
                 sessionStorage.removeItem('userInfo');
                 navigate('/');
@@ -43,7 +34,7 @@ const Header = () => {
                 </div>
 
                 <nav className="header-nav">
-                    {isLoggedIn ? (
+                    {userInfo ? (
                         <>
                             <button 
                                 className="nav-btn"
@@ -82,7 +73,7 @@ const Header = () => {
                 </nav>
 
                 <div className="header-user">
-                    {isLoggedIn ? (
+                    {userInfo ? (
                         <div className="user-dropdown">
                             <button 
                                 className="user-btn"

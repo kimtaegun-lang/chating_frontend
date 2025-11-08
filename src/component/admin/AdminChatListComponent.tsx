@@ -3,9 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getMyChatRooms } from '../../api/ChatApi';
 import { deleteRoom } from '../../api/AdminApi';
 import { chatRoom } from '..';
-import { setUser } from '../../store/authSlice';
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from '../../store/store';
 import PageComponent from '../common/PageComponent';
 import Loading from '../../common/Loading';
 import '../../css/ChatList.css';
@@ -14,23 +11,15 @@ const AdminChatListComponent = () => {
     const [chatRooms, setChatRooms] = useState<chatRoom[]>([]);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const { user } = useSelector((state: RootState) => state.auth);
     const { memberId } = useParams<{ memberId: string }>();
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(0);
-
+    const [totalElements,setTotalElements]=useState<number>(0);
+    const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
 
     useEffect(() => {
 
-        if (!user) {
-            const storedUser = sessionStorage.getItem('userInfo');
-            if (storedUser) {
-                dispatch(setUser(JSON.parse(storedUser)));
-            }
-        }
-
-        if (user?.role !== 'ADMIN') {
+        if (userInfo.role !== 'ADMIN') {
             alert('관리자만 접근 가능합니다.');
             navigate(-1);
             return;
@@ -45,6 +34,7 @@ const AdminChatListComponent = () => {
             setChatRooms(response.data.data.content);
             setCurrentPage(response.data.data.currentPage);
             setTotalPages(response.data.data.totalPages);
+            setTotalElements(response.data.data.totalElements);
         } catch (err: any) {
             alert(err.response?.data || '채팅 목록 조회 실패');
             navigate(-1);
@@ -128,7 +118,7 @@ const AdminChatListComponent = () => {
                     <div className="chat-stats">
                         <div className="stat-item">
                             <span className="stat-label">전체 채팅방</span>
-                            <span className="stat-value">{chatRooms.length}</span>
+                            <span className="stat-value">{totalElements}</span>
                         </div>
                     </div>
                 </div>

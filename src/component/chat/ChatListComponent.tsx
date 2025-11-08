@@ -2,9 +2,6 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyChatRooms } from '../../api/ChatApi';
 import { chatRoom } from '..';
-import { useSelector, useDispatch } from "react-redux";
-import { setUser } from '../../store/authSlice';
-import { RootState } from '../../store/store';
 import PageComponent from '../common/PageComponent';
 import Loading from '../../common/Loading';
 import '../../css/ChatList.css';
@@ -12,36 +9,32 @@ import '../../css/ChatList.css';
 const ChatListComponent = () => {
     const [chatRooms, setChatRooms] = useState<chatRoom[]>([]);
     const [loading, setLoading] = useState(true);
-    const { isLoggedIn, user } = useSelector((state: RootState) => state.auth);
     const [currentPage, setCurrentPage] = useState<number>(0);
     const [totalPages, setTotalPages] = useState<number>(0);
+    const [totalElements,setTotalElements]=useState<number>(0);
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
 
 
     useEffect(() => {
-        if (!user) {
-            const storedUser = sessionStorage.getItem('userInfo');
-            if (storedUser) {
-                dispatch(setUser(JSON.parse(storedUser)));
-            }
-        }
-
-        if (!isLoggedIn) {
+        console.log(userInfo.role)
+        if (!userInfo) {
             alert('로그인이 필요합니다.');
             navigate('../../member/signIn');
             return;
         }
 
         fetchChatRooms(currentPage);
-    }, [isLoggedIn, user?.memId, navigate]);
+    }, []);
 
     const fetchChatRooms = async (currentPage: number) => {
-        getMyChatRooms(currentPage, 10, user?.memId)
+        getMyChatRooms(currentPage, 10, userInfo.memId)
             .then((response) => {
+                console.log(response.data.data.content);
                 setChatRooms(response.data.data.content);
                 setCurrentPage(response.data.data.currentPage);
                 setTotalPages(response.data.data.totalPages);
+                setTotalElements(response.data.data.totalElements);
             })
             .catch((err) => {
                 alert(err.response?.data || '채팅 목록 조회 실패');
@@ -103,12 +96,12 @@ const ChatListComponent = () => {
                 <div className="chat-list-header">
                     <div className="header-content">
                         <h2 className="chat-list-title">💬 채팅 목록</h2>
-                        <p className="chat-list-subtitle">{user?.memId}님의 대화 내역</p>
+                        <p className="chat-list-subtitle">{userInfo.memId}님의 대화 내역</p>
                     </div>
                     <div className="chat-stats">
                         <div className="stat-item">
                             <span className="stat-label">전체 채팅방</span>
-                            <span className="stat-value">{chatRooms.length}</span>
+                            <span className="stat-value">{totalElements}</span>
                         </div>
                     </div>
                 </div>

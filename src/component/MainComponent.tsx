@@ -1,11 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
 import '../css/Page.css';
 
 const MainComponent = () => {
     const navigate = useNavigate();
-    const { isLoggedIn, user } = useSelector((state: RootState) => state.auth);
+    const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
     
 
     return (
@@ -13,10 +11,10 @@ const MainComponent = () => {
             <div className="main-content">
                 <h1 className="main-title">채팅 애플리케이션</h1>
 
-                {isLoggedIn ? (
+                {userInfo ? (
                     <div className="user-section">
                         <p className="welcome-text">
-                            환영합니다, <span className="username">{user?.name}</span>님!
+                            환영합니다, <span className="username">{userInfo.name}</span>님!
                         </p>
 
                         <div className="button-group">

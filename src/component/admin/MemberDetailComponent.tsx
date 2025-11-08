@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { getMemberDetail } from "../../api/AdminApi";
 import { useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import { setUser } from '../../store/authSlice';
-import { RootState } from '../../store/store';
 import Loading from '../../common/Loading';
 import '../../css/MemberList.css';
 
@@ -11,20 +8,12 @@ const MemberDetailComponent = ({ memberId }: { memberId: string }) => {
   const [member, setMember] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useSelector((state: RootState) => state.auth);
+  const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   useEffect(() => {
 
-    if (!user) {
-      const storedUser = sessionStorage.getItem('userInfo');
-      if (storedUser) {
-        dispatch(setUser(JSON.parse(storedUser)));
-      }
-    }
-
-    if (user?.role !== 'ADMIN') {
+    if (userInfo.role !== 'ADMIN') {
       alert('관리자만 접근 가능합니다.');
       navigate(-1);
       return;

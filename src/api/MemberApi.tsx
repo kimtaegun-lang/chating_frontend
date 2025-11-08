@@ -17,7 +17,7 @@ export const signUp = async (formData: userInfo) => {
 
 // 로그인
 export const signIn = async (formData: signInData) => {
-    const response = await axios.post(member + "/signIn", formData, {
+    const response = await api.post(member + "/signIn", formData, {
         headers: { "Content-Type": "application/json" },
         withCredentials: true   
     });

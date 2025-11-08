@@ -2,9 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StompSubscription } from '@stomp/stompjs';
 import { connect, requestRandomMatch, cancelRandomMatch, disconnect } from '../../api/ChatApi';
-import { useSelector, useDispatch } from "react-redux";
-import { setUser } from '../../store/authSlice';
-import { RootState } from '../../store/store';
 import '../../css/ChatMatching.css';
 
 const ChatMatchingComponent = () => {
@@ -14,18 +11,11 @@ const ChatMatchingComponent = () => {
     const subscriptionRef = useRef<StompSubscription | null>(null);
     const hasStartedRef = useRef(false);
     const isConnectedRef = useRef(false); 
-    const {isLoggedIn, user } = useSelector((state: RootState) => state.auth);
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
 
     useEffect(() => {
-       if (!user) {
-            const storedUser = sessionStorage.getItem('userInfo');
-            if (storedUser) {
-                dispatch(setUser(JSON.parse(storedUser)));
-            }
-        }
-        if (!isConnectedRef.current && isLoggedIn) {
+        if (!isConnectedRef.current && userInfo) {
             console.log("=== WebSocket 연결 시작 ===");
             connect(() => {
                 console.log('WebSocket 연결 완료');
@@ -48,17 +38,17 @@ const ChatMatchingComponent = () => {
                 subscriptionRef.current = null;
             }
             if (isMatchingRef.current) {
-                cancelRandomMatch(user?.memId).catch(console.error);
+                cancelRandomMatch(userInfo.memId).catch(console.error);
             }
             disconnect();
             isConnectedRef.current = false;
         };
-    }, [isLoggedIn]);
+    }, []);
 
     
     const startMatching = () => {
 
-        if (!isLoggedIn) {
+        if (!userInfo) {
             alert('로그인이 필요합니다.');
             navigate('../../member/signIn');
             return;
@@ -115,7 +105,7 @@ const ChatMatchingComponent = () => {
             } else {
                 setMessage(data.message || '매칭 대기 중...');
             }
-        }, user?.memId);
+        }, userInfo.memId);
         
         if (subscription) {
             subscriptionRef.current = subscription;
@@ -133,7 +123,7 @@ const ChatMatchingComponent = () => {
             }
             
             // 서버에 취소 요청
-            await cancelRandomMatch(user?.memId);
+            await cancelRandomMatch(userInfo.memId);
             
             setIsMatching(false);
             isMatchingRef.current = false;
