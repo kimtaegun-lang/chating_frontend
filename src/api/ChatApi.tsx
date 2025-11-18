@@ -7,7 +7,6 @@ let stompClient: Client | null = null;
 const chat = `${serverPort}/api/chat`;
 
 export const connect = async (onConnect: () => void) => {
-    await api.post('/api/refresh');
     await new Promise(resolve => setTimeout(resolve, 500));
    
     stompClient = new Client({

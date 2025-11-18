@@ -37,7 +37,8 @@ const SignInComponent = () => {
 
         signIn(userData)
             .then(async (res) => {
-                alert(res.data);
+                alert(res.data.message);
+                sessionStorage.setItem("expiresIn", res.data.expiresIn);
                 try {
                     const info = await validateAndGetUserInfo();
                     const userInfo = info.data.userInfo;
