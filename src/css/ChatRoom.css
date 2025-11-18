@@ -141,15 +141,15 @@
     margin-left: auto;
 }
 
-/* 메시지 버블 */
+/* 메시지 버블 공통 */
 .message-bubble {
-    width: 300px;  /* max-width에서 width로 변경 */
+    width: 300px;
     padding: 12px 16px;
     border-radius: 18px;
     word-wrap: break-word;
-    word-break: break-word;  /* 추가 */
-    overflow-wrap: break-word;  /* 추가 */
-    white-space: pre-wrap;  /* 추가 */
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: pre-wrap;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
@@ -165,6 +165,7 @@
     color: white;
     border-bottom-right-radius: 4px;
 }
+
 /* 발신자명 */
 .message-sender {
     font-size: 11px;
@@ -232,6 +233,222 @@
     transform: scale(1.1);
 }
 
+/* 채팅 입력 영역 */
+.chatroom-input-area {
+    position: sticky;
+    bottom: 0;
+    background-color: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* 입력창 */
+.chatroom-input {
+    flex: 1;
+    padding: 12px 18px;
+    border: 2px solid #e5e7eb;
+    border-radius: 24px;
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s ease;
+    background-color: #f9fafb;
+}
+
+.chatroom-input:focus {
+    border-color: #3b82f6;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.chatroom-input::placeholder {
+    color: #9ca3af;
+}
+
+/* 전송 버튼 */
+.chatroom-send-btn {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.chatroom-send-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.chatroom-send-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+}
+
+.chatroom-send-btn:disabled {
+    background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.6;
+}
+
+/* 파일 첨부 버튼 */
+.chatroom-file-btn {
+    background: #f0f0f0;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.2s;
+}
+
+.chatroom-file-btn:hover:not(:disabled) {
+    background: #e0e0e0;
+}
+
+.chatroom-file-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* 이미지 메시지 */
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px;
+}
+
+.message-image {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    cursor: pointer;
+    object-fit: cover;
+    display: block;
+}
+
+.message-image:hover {
+    opacity: 0.9;
+}
+
+/* 파일 메시지 */
+.file-bubble {
+    min-width: 250px;
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px;
+}
+
+.file-icon {
+    font-size: 24px;
+}
+
+.file-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.file-name {
+    font-weight: 500;
+    word-break: break-all;
+}
+
+.file-size-display {
+    font-size: 0.85em;
+    color: white;
+    opacity: 0.9;
+}
+
+.file-bubble.left .file-size-display {
+    color: #666;
+}
+
+.file-download-btn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    flex-shrink: 0;
+}
+
+.file-download-btn:hover {
+    background: #45a049;
+}
+
+/* 파일 미리보기 */
+.file-preview-container {
+    padding: 10px 20px;
+    border-top: 1px solid #e0e0e0;
+    background: #f9f9f9;
+}
+
+.file-preview-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.file-preview-image {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.file-preview-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.file-cancel-btn {
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.file-cancel-btn:hover {
+    background: #cc0000;
+}
+
 /* 반응형 */
 @media (max-width: 768px) {
     .chatroom-container {
@@ -265,110 +482,40 @@
     .message-delete-btn {
         opacity: 1;
     }
-}
-/* 채팅 입력 영역 */
-.chatroom-input-area {
-  position: sticky;
-  bottom: 0;
-  background-color: #ffffff;
-  border-top: 1px solid #e5e7eb;
-  padding: 16px 20px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-}
 
-/* 입력창 */
-.chatroom-input {
-  flex: 1;
-  padding: 12px 18px;
-  border: 2px solid #e5e7eb;
-  border-radius: 24px;
-  font-size: 15px;
-  outline: none;
-  transition: all 0.2s ease;
-  background-color: #f9fafb;
+    .chatroom-input-area {
+        padding: 12px 16px;
+        gap: 8px;
+    }
+
+    .chatroom-input {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+
+    .chatroom-send-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
 }
 
-.chatroom-input:focus {
-  border-color: #3b82f6;
-  background-color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.chatroom-input::placeholder {
-  color: #9ca3af;
-}
-
-/* 전송 버튼 */
-.chatroom-send-btn {
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
-  border: none;
-  border-radius: 24px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
-}
-
-.chatroom-send-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
-}
-
-.chatroom-send-btn:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
-}
-
-.chatroom-send-btn:disabled {
-  background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
-  cursor: not-allowed;
-  box-shadow: none;
-  opacity: 0.6;
-}
-
-/* 모바일 반응형 */
-@media (max-width: 768px) {
-  .chatroom-input-area {
-    padding: 12px 16px;
-    gap: 8px;
-  }
-
-  .chatroom-input {
-    padding: 10px 16px;
-    font-size: 14px;
-  }
-
-  .chatroom-send-btn {
-    padding: 10px 20px;
-    font-size: 14px;
-  }
-}
-
-/* 작은 화면에서는 버튼을 아이콘으로 */
+/* 작은 화면 - 전송 버튼 아이콘화 */
 @media (max-width: 480px) {
-  .chatroom-send-btn {
-    width: 44px;
-    height: 44px;
-    padding: 0;
-    border-radius: 50%;
-    font-size: 0;
-    position: relative;
-  }
+    .chatroom-send-btn {
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border-radius: 50%;
+        font-size: 0;
+        position: relative;
+    }
 
-  .chatroom-send-btn::after {
-    content: '➤';
-    font-size: 18px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
+    .chatroom-send-btn::after {
+        content: '➤';
+        font-size: 18px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
 }

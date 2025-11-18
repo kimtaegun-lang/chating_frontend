@@ -1,7 +1,9 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 import { signOut } from './MemberApi';
 
-const serverPort = process.env.REACT_APP_SERVER_PORT;
+//const serverPort = process.env.REACT_APP_SERVER_PORT;
+//const serverPort = localStorage.getItem("SERVER") || process.env.REACT_APP_SERVER_PORT;
+const serverPort =  'http://localhost:8080';
 const api = axios.create({
     baseURL: serverPort,
     withCredentials: true
@@ -54,7 +56,6 @@ api.interceptors.response.use(
             // 최근에 갱신했으면 대기
             if (now - lastRefreshTime < REFRESH_COOLDOWN) {
                 const waitTime = REFRESH_COOLDOWN - (now - lastRefreshTime);
-                console.log(`토큰 갱신 쿨다운 ${waitTime}ms 대기 중...`);
                 await new Promise(resolve => setTimeout(resolve, waitTime));
             }
             

@@ -56,6 +56,7 @@ const AdminChatListComponent = () => {
 
         try {
             await deleteRoom(roomId);
+            setTotalElements(prev => prev - 1);
             setChatRooms(chatRooms.filter(room => room.roomId !== roomId));
             alert('채팅방이 삭제되었습니다.');
         } catch (err: any) {
