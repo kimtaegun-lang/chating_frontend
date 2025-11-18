@@ -12,7 +12,6 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     const [isLoading, setIsLoading] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [filePreview, setFilePreview] = useState<string | null>(null);
-    const [downloadedFiles, setDownloadedFiles] = useState<Set<string>>(new Set());
     const messageEndRef = useRef<HTMLDivElement | null>(null);
     const scrollContainerRef = useRef<HTMLDivElement | null>(null);
     const prevScrollHeightRef = useRef<number>(0);
@@ -74,16 +73,19 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
         }
     };
 
-    const handleFileDownload = async (url: string, filename: string, isDownloaded: boolean) => {
-        // 이미 다운로드된 파일이면 새 탭에서 열기
-        if (isDownloaded) {
-            window.open(url, '_blank');
-            return;
-        }
-
-        // 다운로드
+    const handleFileDownload = async (url: string, filename: string) => {
         try {
             const response = await fetch(url);
+            
+            // 404 또는 403 에러 체크 (30일 경과 파일)
+            if (!response.ok) {
+                if (response.status === 404 || response.status === 403) {
+                    alert('30일이 경과하여 다운로드할 수 없습니다.');
+                    return;
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
             const blob = await response.blob();
             const downloadUrl = window.URL.createObjectURL(blob);
             const link = document.createElement('a');
@@ -93,9 +95,6 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
             link.click();
             document.body.removeChild(link);
             window.URL.revokeObjectURL(downloadUrl);
-
-            // 다운로드 완료 후 상태 업데이트
-            setDownloadedFiles(prev => new Set(prev).add(url));
         } catch (error) {
             console.error('파일 다운로드 실패:', error);
             alert('파일 다운로드에 실패했습니다.');
@@ -193,6 +192,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
             const effectiveUser = userInfo ?? sessionUser;
 
             getConversation(receiver, 10, chatId, roomId, effectiveUser?.memId).then(response => {
+                console.log(response.data.data);
                 const newMessages = response.data.data.content.reverse();
                 const newChatId = response.data.data.currentPage;
 
@@ -215,7 +215,6 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
 
     const renderMessageContent = (msg: any) => {
         const isMine = msg.sender === userInfo.memId;
-        const isDownloaded = downloadedFiles.has(msg.url);
 
         // url과 fileName이 있으면 파일로 처리 (type과 무관하게)
         const isFile = msg.url && msg.fileName;
@@ -223,14 +222,34 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
         // 이미지 타입
         if (isFile && isImageFile(msg.fileName)) {
             return (
-                <div className={`message-bubble ${isMine ? 'right' : 'left'}`}>
-                    <div className="image-container">
+                <div className={`message-bubble file-bubble ${isMine ? 'right' : 'left'}`}>
+                    <div className="image-preview-container">
                         <img
                             src={msg.url}
                             alt={msg.fileName}
                             className="message-image"
                             onClick={() => window.open(msg.url, '_blank')}
+                            onError={(e) => {
+                                // 이미지 로드 실패 시 (30일 경과)
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.parentElement!.innerHTML = '<div class="expired-file-message">📅 30일이 경과하여 사용할 수 없습니다.</div>';
+                            }}
                         />
+                    </div>
+                    <div className="file-info">
+                        <div className="file-icon">🖼️</div>
+                        <div className="file-details">
+                            <div className="file-name">{msg.fileName}</div>
+                            <div className="file-size-display">{formatFileSize(msg.fileSize || 0)}</div>
+                        </div>
+                        <button
+                            className="file-download-btn"
+                            onClick={() => handleFileDownload(msg.url, msg.fileName)}
+                            title="다운로드"
+                        >
+                            ⬇️
+                        </button>
                     </div>
                     <div className={`message-time ${isMine ? 'right' : 'left'}`}>
                         {formatDateTime(msg.createdAt)}
@@ -251,10 +270,10 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                         </div>
                         <button
                             className="file-download-btn"
-                            onClick={() => handleFileDownload(msg.url, msg.fileName, isDownloaded)}
-                            title={isDownloaded ? "파일 열기" : "다운로드"}
+                            onClick={() => handleFileDownload(msg.url, msg.fileName)}
+                            title="다운로드"
                         >
-                            {isDownloaded ? '📄' : '⬇'}
+                            ⬇️
                         </button>
                     </div>
                     <div className={`message-time ${isMine ? 'right' : 'left'}`}>
@@ -293,7 +312,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                     const isMine = msg.sender === userInfo.memId;
                     return (
                         <div
-                            key={idx}
+                            key={msg.chatId}
                             className={`message-wrapper ${isMine ? 'right' : 'left'}`}
                         >
                             {renderMessageContent(msg)}

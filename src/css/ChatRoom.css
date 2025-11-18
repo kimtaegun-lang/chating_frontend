@@ -519,3 +519,28 @@
         transform: translate(-50%, -50%);
     }
 }
+
+.expired-file-message {
+    padding: 20px;
+    text-align: center;
+    color: #999;
+    font-size: 0.9em;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+}
+
+.image-preview-container {
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.image-preview-container .message-image {
+    width: 100%;
+    max-width: 300px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.image-preview-container .message-image:hover {
+    opacity: 0.9;
+}
