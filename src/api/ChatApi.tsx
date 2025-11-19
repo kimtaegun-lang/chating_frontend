@@ -7,20 +7,37 @@ const chat = `${serverPort}/api/chat`;
 
 export const connect = async (onConnect: () => void) => {
     await new Promise(resolve => setTimeout(resolve, 500));
-   
+    
     stompClient = new Client({
         webSocketFactory: () => new SockJS(`${serverPort}/ws-chat`),
         reconnectDelay: 5000,
         heartbeatIncoming: 4000,
         heartbeatOutgoing: 4000,
+        
+        //  연결 시도 전에 매번 실행됨
+        beforeConnect: async () => {
+            console.log('🔄 연결 시도 전 토큰 갱신 중...');
+            try {
+                await api.post('/api/refresh');
+                console.log('✅ 토큰 갱신 성공');
+            } catch (error) {
+                console.error('❌ 토큰 갱신 실패:', error);
+                // 토큰 갱신 실패 시 재연결 중단
+                stompClient?.deactivate();
+                alert('세션이 만료되었습니다. 다시 로그인해주세요.');
+                window.location.href = '/login';
+            }
+        },
+        
         onConnect: (frame) => {
             console.log('WebSocket 연결 성공!', frame);
             onConnect();
         },
+        
         onStompError: (frame: any) => {
-            console.error('STOMP Error:', frame.body);
-            console.error('STOMP Error Headers:', frame.headers);
+            console.error('STOMP Error:', frame);
         },
+        
         onWebSocketClose: () => {
             console.warn('WebSocket 연결 종료');
         }
