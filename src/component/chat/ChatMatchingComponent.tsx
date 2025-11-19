@@ -15,6 +15,12 @@ const ChatMatchingComponent = () => {
     const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
 
     useEffect(() => {
+        if(userInfo.role === 'ADMIN') {
+            alert('일반 회원만 매칭 기능을 이용하실 수 있습니다.');
+            navigate(-1);
+            return;
+        }
+
         if (!isConnectedRef.current && userInfo) {
             console.log("=== WebSocket 연결 시작 ===");
             connect(() => {
