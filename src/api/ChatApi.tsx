@@ -2,7 +2,6 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { serverPort, api } from './RootApi';
 import { StompSubscription } from '@stomp/stompjs';
-
 let stompClient: Client | null = null;
 const chat = `${serverPort}/api/chat`;
 
@@ -146,13 +145,56 @@ export const getConversation = async (user2: string, limit: number, chatId: numb
     return response;
 };
 
+/*
 export const requestRandomMatch = (onMatch: (data: any) => void, userId?: string): StompSubscription | null => {
     if (!stompClient || !stompClient.connected) {
         console.warn('STOMP 클라이언트가 연결되지 않았습니다.');
         return null;
     }
     
-    // /user/queue/match 구독 (Spring이 자동으로 /queue/match-user{sessionId}로 변환)
+    const subscribePath = `/user/queue/match`;
+    console.log('🔔 구독 경로:', subscribePath);
+    
+    const subscription = stompClient.subscribe(
+        subscribePath,
+        (msg: any) => {   
+            try {
+                const data = JSON.parse(msg.body);
+                if(data.matched===false) {
+                    alert(data.error);
+                    return;
+                }
+                console.log("매칭 데이터:", data);
+                onMatch(data);
+            } catch (error) {
+                console.error('메시지 파싱 오류:', error);
+            }
+        }
+    );
+    
+    setTimeout(() => {
+        if (stompClient && stompClient.connected) {
+            stompClient.publish({
+                destination: '/app/random/match',
+                body: JSON.stringify({ userId })
+            });
+            console.log('매칭 요청 전송 완료');
+        }
+    }, 1000);
+    
+    return subscription;
+};*/
+
+export const requestRandomMatch = (
+    onMatch: (data: any) => void,
+    onError?: (error: string) => void,
+    userId?: string
+): StompSubscription | null => {
+    if (!stompClient || !stompClient.connected) {
+        console.warn('STOMP 클라이언트가 연결되지 않았습니다.');
+        return null;
+    }
+    
     const subscribePath = `/user/queue/match`;
     console.log('🔔 구독 경로:', subscribePath);
     
@@ -163,7 +205,21 @@ export const requestRandomMatch = (onMatch: (data: any) => void, userId?: string
                 console.log("✅ 매칭 메시지 수신!");
                 const data = JSON.parse(msg.body);
                 console.log("매칭 데이터:", data);
+                
+                // 에러 처리
+                if (data.matched === false && data.error) {
+                    console.error('매칭 에러:', data.error);
+                    if (onError) {
+                        onError(data.error);
+                    } else {
+                        alert(data.error);
+                    }
+                    return;
+                }
+                
+                // 성공 및 대기 메시지 처리
                 onMatch(data);
+                
             } catch (error) {
                 console.error('메시지 파싱 오류:', error);
             }

@@ -7,7 +7,6 @@ import '../../css/ChatRoom.css';
 
 const AdminChatRoomComponent = () => {
     const [messages, setMessages] = useState<message[]>([]);
-    const [connected, setConnected] = useState(false);
     const [chatId, setChatId] = useState<number>(0);
     const [isLoading, setIsLoading] = useState(false);
     const { memberId, roomId, receiver } = useParams<{ memberId: string; roomId: string; receiver: string }>();
@@ -17,13 +16,12 @@ const AdminChatRoomComponent = () => {
     const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
     const navigate = useNavigate();
 
+    const scrollToBottom = () => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+        }
+    };
 
-  const scrollToBottom = () => {
-    if (scrollContainerRef.current) {
-        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-    }
-};
-    // 날짜/시간 포맷팅 함수
     const formatDateTime = (dateString: string) => {
         const date = new Date(dateString);
         const year = String(date.getFullYear()).slice(2);
@@ -35,7 +33,44 @@ const AdminChatRoomComponent = () => {
         return `${year}/${month}/${day} ${hours}:${minutes}`;
     };
 
-    // 채팅 삭제 핸들러 (관리자는 모든 메시지 삭제 가능)
+    const formatFileSize = (bytes: number): string => {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    };
+
+    const isImageFile = (filename: string): boolean => {
+        const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+        return imageExtensions.some(ext => filename.toLowerCase().endsWith(ext));
+    };
+
+    const handleFileDownload = async (url: string, filename: string) => {
+        try {
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                if (response.status === 404 || response.status === 403) {
+                    alert('30일이 경과하여 다운로드할 수 없습니다.');
+                    return;
+                }
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (error) {
+            console.error('파일 다운로드 실패:', error);
+            alert('파일 다운로드에 실패했습니다.');
+        }
+    };
+
     const handleDelete = async (msgChatId: number) => {
         if (window.confirm('이 메시지를 삭제하시겠습니까?')) {
             try {
@@ -50,9 +85,7 @@ const AdminChatRoomComponent = () => {
     };
 
     useEffect(() => { 
-
-        if(userInfo.role !== 'ADMIN')
-        {
+        if(userInfo.role !== 'ADMIN') {
             alert('관리자만 접근 가능합니다.');
             navigate(-1);
             return;
@@ -64,23 +97,19 @@ const AdminChatRoomComponent = () => {
             return;
         }
 
-        setConnected(true);
-
         connect(() => {
             subscribe(Number(roomId), (newMessage) => {
-                // 삭제 타입 메시지인 경우
                 if (newMessage.type === 'DELETE') {
                     setMessages(prev => prev.filter(msg => msg.chatId !== newMessage.chatId));
                     return;
                 }
                 
-                // 새 메시지 추가
-                if (newMessage.type === 'CREATE') {
+                if (newMessage.type === 'FILE' || newMessage.type === 'TEXT') {
                     setMessages(prev => [...prev, newMessage]);
                 }
-            },memberId);
+            }, memberId);
 
-            getConversation(receiver, 10, chatId, Number(roomId),memberId)
+            getConversation(receiver, 10, chatId, Number(roomId), memberId)
                 .then(response => {
                     console.log(response.data.data.content);
                     setMessages(response.data.data.content.reverse());
@@ -98,12 +127,10 @@ const AdminChatRoomComponent = () => {
         }; 
     }, []);
 
-    // 새 메시지 도착 시 스크롤 하단으로
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
 
-    // 스크롤 이벤트 핸들러
     const handleScroll = () => {
         const container = scrollContainerRef.current;
         if (!container || isLoading || chatId === 0) return;
@@ -112,7 +139,7 @@ const AdminChatRoomComponent = () => {
             setIsLoading(true);
             prevScrollHeightRef.current = container.scrollHeight;
 
-            getConversation( receiver!, 10, chatId, Number(roomId),memberId!)
+            getConversation(receiver!, 10, chatId, Number(roomId), memberId!)
                 .then(response => {
                     const newMessages = response.data.data.content.reverse();
                     const newChatId = response.data.data.currentPage;
@@ -135,6 +162,86 @@ const AdminChatRoomComponent = () => {
         }
     };
 
+    const renderMessageContent = (msg: any, isLeftSide: boolean) => {
+        const isFile = msg.url && msg.fileName;
+
+        // 이미지 타입
+        if (isFile && isImageFile(msg.fileName)) {
+            return (
+                <div className={`message-bubble file-bubble ${isLeftSide ? 'left' : 'right'}`}>
+                    <div className="message-sender">{msg.sender}</div>
+                    <div className="image-preview-container">
+                        <img
+                            src={msg.url}
+                            alt={msg.fileName}
+                            className="message-image"
+                            onClick={() => window.open(msg.url, '_blank')}
+                            onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                target.parentElement!.innerHTML = '<div class="expired-file-message">📅 30일이 경과하여 사용할 수 없습니다.</div>';
+                            }}
+                        />
+                    </div>
+                    <div className="file-info">
+                        <div className="file-icon">🖼️</div>
+                        <div className="file-details">
+                            <div className="file-name">{msg.fileName}</div>
+                            <div className="file-size-display">{formatFileSize(msg.fileSize || 0)}</div>
+                        </div>
+                        <button
+                            className="file-download-btn"
+                            onClick={() => handleFileDownload(msg.url, msg.fileName)}
+                            title="다운로드"
+                        >
+                            ⬇️
+                        </button>
+                    </div>
+                    <div className={`message-time ${isLeftSide ? 'left' : 'right'}`}>
+                        {formatDateTime(msg.createdAt)}
+                    </div>
+                </div>
+            );
+        }
+
+        // 파일 타입
+        if (isFile) {
+            return (
+                <div className={`message-bubble file-bubble ${isLeftSide ? 'left' : 'right'}`}>
+                    <div className="message-sender">{msg.sender}</div>
+                    <div className="file-info">
+                        <div className="file-icon">📎</div>
+                        <div className="file-details">
+                            <div className="file-name">{msg.fileName}</div>
+                            <div className="file-size-display">{formatFileSize(msg.fileSize || 0)}</div>
+                        </div>
+                        <button
+                            className="file-download-btn"
+                            onClick={() => handleFileDownload(msg.url, msg.fileName)}
+                            title="다운로드"
+                        >
+                            ⬇️
+                        </button>
+                    </div>
+                    <div className={`message-time ${isLeftSide ? 'left' : 'right'}`}>
+                        {formatDateTime(msg.createdAt)}
+                    </div>
+                </div>
+            );
+        }
+
+        // 텍스트 타입
+        return (
+            <div className={`message-bubble ${isLeftSide ? 'left' : 'right'}`}>
+                <div className="message-sender">{msg.sender}</div>
+                <div className="message-content">{msg.content}</div>
+                <div className={`message-time ${isLeftSide ? 'left' : 'right'}`}>
+                    {formatDateTime(msg.createdAt)}
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div className="chatroom-container">
             <div className="chatroom-header">
@@ -142,9 +249,6 @@ const AdminChatRoomComponent = () => {
                     <h2 className="chatroom-title">
                         {memberId} ↔ {receiver}
                     </h2>
-                    <span className={`chatroom-status ${connected ? 'connected' : 'disconnected'}`}>
-                        {connected ? '● 연결됨' : '○ 연결 중...'}
-                    </span>
                 </div>
                 <div className="admin-badge">관리자 모드</div>
             </div>
@@ -159,28 +263,15 @@ const AdminChatRoomComponent = () => {
                 onScroll={handleScroll}
                 className="chatroom-messages"
             >
-                {isLoading && (
-                    <Loading/>
-                )}
+                {isLoading && <Loading />}
                 {messages.map((msg, idx) => {
-                    // memberId가 보낸 메시지는 좌측, receiver가 보낸 메시지는 우측
                     const isLeftSide = msg.sender === memberId;
                     return (
                         <div
-                            key={idx}
+                            key={msg.chatId || idx}
                             className={`message-wrapper ${isLeftSide ? 'left' : 'right'}`}
                         >
-                            <div className={`message-bubble ${isLeftSide ? 'left' : 'right'}`}>
-                                <div className="message-sender">
-                                    {msg.sender}
-                                </div>
-                                <div className="message-content">
-                                    {msg.content}
-                                </div>
-                                <div className="message-time">
-                                    {formatDateTime(msg.createdAt)}
-                                </div>
-                            </div>
+                            {renderMessageContent(msg, isLeftSide)}
                             
                             {msg.chatId && (
                                 <button

@@ -47,7 +47,6 @@ const ChatMatchingComponent = () => {
 
     
     const startMatching = () => {
-
         if (!userInfo) {
             alert('로그인이 필요합니다.');
             navigate('../../member/signIn');
@@ -74,18 +73,47 @@ const ChatMatchingComponent = () => {
         isMatchingRef.current = true;
         setMessage('매칭 대기 중...');
         
-        const subscription = requestRandomMatch((data) => {
-            if (data.matched) {
-                const { roomId, receiver } = data;
-                
-                if (!roomId || !receiver) {
-                    console.error('매칭 데이터 불완전:', { roomId, receiver });
-                    setMessage('매칭 오류가 발생했습니다.');
-                    return;
+        const subscription = requestRandomMatch(
+            // onMatch 콜백: 성공 및 대기 메시지 처리
+            (data) => {
+                // 매칭 성공
+                if (data.matched === true) {
+                    const { roomId, receiver } = data;
+                    
+                    if (!roomId || !receiver) {
+                        console.error('매칭 데이터 불완전:', { roomId, receiver });
+                        setMessage('매칭 오류가 발생했습니다.');
+                        return;
+                    }
+                    
+                    console.log('✅ 매칭 성공!', { roomId, receiver });
+                    setMessage(`매칭 성공! ${receiver}님과 연결되었습니다.`);
+                    
+                    // 구독 해제
+                    if (subscriptionRef.current) {
+                        subscriptionRef.current.unsubscribe();
+                        subscriptionRef.current = null;
+                    }
+                    
+                    // 채팅방으로 이동
+                    setTimeout(() => {
+                        navigate(`/chat/room/${roomId}/${receiver}`, {
+                            state: { 
+                                receiver: receiver,
+                                roomId: roomId
+                            }
+                        });
+                    }, 1000);
+                } 
+                // 대기 중 메시지
+                else if (data.matched === false && data.message) {
+                    setMessage(data.message);
                 }
-                
-                console.log('✅ 매칭 성공!', { roomId, receiver });
-                setMessage(`매칭 성공! ${receiver}님과 연결되었습니다.`);
+            },
+            // onError 콜백: 에러 처리
+            (error) => {
+                console.error('매칭 에러:', error);
+                alert(error);
                 
                 // 구독 해제
                 if (subscriptionRef.current) {
@@ -93,19 +121,15 @@ const ChatMatchingComponent = () => {
                     subscriptionRef.current = null;
                 }
                 
-                // 채팅방으로 이동
-                setTimeout(() => {
-                    navigate(`/chat/room/${roomId}/${receiver}`, {
-                        state: { 
-                            receiver: receiver,
-                            roomId: roomId
-                        }
-                    });
-                }, 1000);
-            } else {
-                setMessage(data.message || '매칭 대기 중...');
-            }
-        }, userInfo.memId);
+                // 상태 초기화
+                setIsMatching(false);
+                isMatchingRef.current = false;
+                
+                // 뒤로가기
+                navigate(-1);
+            },
+            userInfo.memId
+        );
         
         if (subscription) {
             subscriptionRef.current = subscription;
@@ -133,9 +157,9 @@ const ChatMatchingComponent = () => {
             setTimeout(() => {
                 navigate(-1);
             }, 500);
-        } catch (error) {
-            console.error('매칭 취소 실패:', error);
-            alert('매칭 취소에 실패했습니다.');
+        } catch (error: any) {
+            alert(error.response?.data || '매칭 취소 실패');
+            navigate(-1);
         }
     };
 
