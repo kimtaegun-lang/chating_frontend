@@ -155,7 +155,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                 }
 
                 // FILE, TEXT 타입 모두 추가
-                if (newMessage.type === 'FILE' || newMessage.type === 'TEXT') {
+                if (newMessage.type === 'FILE' || newMessage.type === 'TEXT'|| newMessage.type === 'IMAGE') {
                     setMessages(prev => [...prev, newMessage]);
                 }
             }, userInfo.memId);

@@ -1,7 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-//const serverPort = process.env.REACT_APP_SERVER_PORT;
-//const serverPort = localStorage.getItem("SERVER") || process.env.REACT_APP_SERVER_PORT;
 const serverPort = 'http://localhost:8080';
 
 const api = axios.create({
@@ -9,10 +7,8 @@ const api = axios.create({
     withCredentials: true
 });
 
-// refresh 중복 호출 방지용 Promise
 let refreshPromise: Promise<any> | null = null;
 
-// 실제 refresh 함수
 const doRefresh = () => {
     if (!refreshPromise) {
         refreshPromise = api.post('/api/refresh')
@@ -21,8 +17,15 @@ const doRefresh = () => {
                     const newExpiry = Date.now() + (res.data.expiresIn * 1000);
                     sessionStorage.setItem('tokenExpiry', newExpiry.toString());
                 }
+                return res;
             })
             .catch(err => {
+                // 409 Conflict는 무시 (토큰이 아직 유효함)
+                if (err.response?.status === 409) {
+                    console.log('토큰이 아직 유효합니다.');
+                    return Promise.resolve(); 
+                }
+                
                 sessionStorage.clear();
                 alert('세션이 만료되었습니다. 다시 로그인해주세요.');
                 window.location.href = '/member/signIn';
@@ -35,7 +38,6 @@ const doRefresh = () => {
     return refreshPromise;
 };
 
-// Request Interceptor - 만료 5분 전 자동 갱신
 api.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
         if (config.url?.includes('/api/refresh')) {
@@ -48,7 +50,7 @@ api.interceptors.request.use(
             const fiveMinutes = 5 * 60 * 1000;
 
             if (timeLeft < fiveMinutes && timeLeft > 0) {
-                await doRefresh();
+                await doRefresh().catch(() => {}); // ← 에러 삼키기
             }
         }
 
@@ -59,14 +61,24 @@ api.interceptors.request.use(
     }
 );
 
-// Response Interceptor - 401 / 403 처리
 api.interceptors.response.use(
     response => response,
     async (error: AxiosError) => {
         const originalRequest = error.config as any;
 
+        // /api/refresh의 409는 여기서 처리
         if (originalRequest?.url?.includes('/api/refresh')) {
+            if (error.response?.status === 409) {
+                console.log('토큰이 아직 유효합니다.');
+                return Promise.resolve({ data: {} }); // ← 빈 응답 반환
+            }
             return Promise.reject(error);
+        }
+
+        // 409 Conflict → 토큰 유효, 무시하고 계속
+        if (error.response?.status === 409) {
+            console.log('토큰이 아직 유효합니다. 요청을 계속합니다.');
+            return api(originalRequest);
         }
 
          // 403 → refresh 토큰 만료 → 로그아웃
@@ -81,7 +93,7 @@ api.interceptors.response.use(
             originalRequest._retry = true;
             try {
                 await doRefresh();
-                return api(originalRequest); // 원래 요청 재실행
+                return api(originalRequest);
             } catch (e) {
                 return Promise.reject(e);
             }

@@ -5,7 +5,17 @@ import { StompSubscription } from '@stomp/stompjs';
 let stompClient: Client | null = null;
 const chat = `${serverPort}/api/chat`;
 
+
 export const connect = async (onConnect: () => void) => {
+   try {
+        await api.post('/api/refresh');
+    } catch (error: any) {
+        // 409는 무시 (토큰 유효), 나머지는 로그
+        if (error.response?.status !== 409) {
+            console.error('토큰 갱신 실패:', error);
+        }
+    }
+
     await new Promise(resolve => setTimeout(resolve, 500));
     
     stompClient = new Client({
@@ -14,37 +24,27 @@ export const connect = async (onConnect: () => void) => {
         heartbeatIncoming: 4000,
         heartbeatOutgoing: 4000,
         
-        //  연결 시도 전에 매번 실행됨
-        beforeConnect: async () => {
-            console.log('🔄 연결 시도 전 토큰 갱신 중...');
-            try {
-                await api.post('/api/refresh');
-                console.log('✅ 토큰 갱신 성공');
-            } catch (error) {
-                console.error('❌ 토큰 갱신 실패:', error);
-                // 토큰 갱신 실패 시 재연결 중단
-                stompClient?.deactivate();
-                alert('세션이 만료되었습니다. 다시 로그인해주세요.');
-                window.location.href = '/login';
-            }
-        },
-        
         onConnect: (frame) => {
             console.log('WebSocket 연결 성공!', frame);
             onConnect();
         },
         
         onStompError: (frame: any) => {
-            console.error('STOMP Error:', frame);
-        },
+    console.error('STOMP Error:', frame);
+},
         
-        onWebSocketClose: () => {
-            console.warn('WebSocket 연결 종료');
-        }
+       onWebSocketClose:async (evt) => {
+        if (evt.code === 1002) {  
+        alert('알수 없는 오류로 인해 연결이 종료되었습니다.');
+         window.location.href = '/';
+    } 
+}
     });
-
     stompClient.activate();
-};
+};  
+
+
+
 
 export const subscribe = (roomId: number, onMessage: (message: any) => void, loginId?: string) => {
     if (!stompClient?.connected) {
@@ -162,45 +162,6 @@ export const getConversation = async (user2: string, limit: number, chatId: numb
     return response;
 };
 
-/*
-export const requestRandomMatch = (onMatch: (data: any) => void, userId?: string): StompSubscription | null => {
-    if (!stompClient || !stompClient.connected) {
-        console.warn('STOMP 클라이언트가 연결되지 않았습니다.');
-        return null;
-    }
-    
-    const subscribePath = `/user/queue/match`;
-    console.log('🔔 구독 경로:', subscribePath);
-    
-    const subscription = stompClient.subscribe(
-        subscribePath,
-        (msg: any) => {   
-            try {
-                const data = JSON.parse(msg.body);
-                if(data.matched===false) {
-                    alert(data.error);
-                    return;
-                }
-                console.log("매칭 데이터:", data);
-                onMatch(data);
-            } catch (error) {
-                console.error('메시지 파싱 오류:', error);
-            }
-        }
-    );
-    
-    setTimeout(() => {
-        if (stompClient && stompClient.connected) {
-            stompClient.publish({
-                destination: '/app/random/match',
-                body: JSON.stringify({ userId })
-            });
-            console.log('매칭 요청 전송 완료');
-        }
-    }, 1000);
-    
-    return subscription;
-};*/
 
 export const requestRandomMatch = (
     onMatch: (data: any) => void,
