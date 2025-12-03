@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StompSubscription } from '@stomp/stompjs';
-import { connect, requestRandomMatch, cancelRandomMatch, disconnect } from '../../api/ChatApi';
+import { requestRandomMatch, cancelRandomMatch } from '../../api/ChatApi';
 import '../../css/ChatMatching.css';
 
 const ChatMatchingComponent = () => {
@@ -10,7 +10,6 @@ const ChatMatchingComponent = () => {
     const [message, setMessage] = useState('');
     const subscriptionRef = useRef<StompSubscription | null>(null);
     const hasStartedRef = useRef(false);
-    const isConnectedRef = useRef(false); 
     const navigate = useNavigate();
     const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
 
@@ -21,18 +20,10 @@ const ChatMatchingComponent = () => {
             return;
         }
 
-        if (!isConnectedRef.current && userInfo) {
-            console.log("=== WebSocket 연결 시작 ===");
-            connect(() => {
-                console.log('WebSocket 연결 완료');
-                isConnectedRef.current = true;
-                
-                // 연결 후 자동 매칭 시작
-                if (!hasStartedRef.current) {
-                    hasStartedRef.current = true;
-                    startMatchingRequest();  
-                }
-            });
+        // 컴포넌트 마운트 시 자동으로 매칭 시작
+        if (!hasStartedRef.current && userInfo) {
+            hasStartedRef.current = true;
+            startMatchingRequest();
         }
         
         // 컴포넌트 언마운트 시 정리
@@ -46,12 +37,9 @@ const ChatMatchingComponent = () => {
             if (isMatchingRef.current) {
                 cancelRandomMatch(userInfo.memId).catch(console.error);
             }
-            disconnect();
-            isConnectedRef.current = false;
         };
     }, []);
 
-    
     const startMatching = () => {
         if (!userInfo) {
             alert('로그인이 필요합니다.');
@@ -59,21 +47,10 @@ const ChatMatchingComponent = () => {
             return;
         }
         
-        // 이미 연결되어 있으면 바로 매칭 요청
-        if (isConnectedRef.current) {
-            startMatchingRequest();
-        } else {
-            // 연결되어 있지 않으면 연결 후 매칭
-            setMessage('서버 연결 중...');
-            connect(() => {
-                console.log('WebSocket 연결 완료');
-                isConnectedRef.current = true;
-                startMatchingRequest();
-            });
-        }
+        startMatchingRequest();
     };
 
-    // 매칭 요청 (연결과 분리)
+    // 매칭 요청
     const startMatchingRequest = () => {
         setIsMatching(true);
         isMatchingRef.current = true;

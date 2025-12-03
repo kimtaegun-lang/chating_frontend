@@ -1,6 +1,6 @@
 import { message } from '..';
 import { useEffect, useState, useRef } from "react";
-import { connect, subscribe, disconnect, getConversation, deleteMessage } from '../../api/ChatApi';
+import { subscribe, getConversation, deleteMessage } from '../../api/ChatApi';
 import { useNavigate, useParams } from "react-router-dom";
 import Loading from '../../common/Loading';
 import '../../css/ChatRoom.css';
@@ -97,35 +97,38 @@ const AdminChatRoomComponent = () => {
             return;
         }
 
-        connect(() => {
-            subscribe(Number(roomId), (newMessage) => {
-                if (newMessage.type === 'DELETE') {
-                    setMessages(prev => prev.filter(msg => msg.chatId !== newMessage.chatId));
-                    return;
-                }
-                
-                if (newMessage.type === 'FILE' || newMessage.type === 'TEXT') {
-                    setMessages(prev => [...prev, newMessage]);
-                }
-            }, memberId);
+        // 채팅방 입장 시 구독 시작
+        const subscription = subscribe(Number(roomId), (newMessage) => {
+            if (newMessage.type === 'DELETE') {
+                setMessages(prev => prev.filter(msg => msg.chatId !== newMessage.chatId));
+                return;
+            }
+            
+            if (newMessage.type === 'FILE' || newMessage.type === 'TEXT') {
+                setMessages(prev => [...prev, newMessage]);
+            }
+        }, memberId);
 
-            getConversation(receiver, 10, chatId, Number(roomId), memberId)
-                .then(response => {
-                    console.log(response.data.data.content);
-                    setMessages(response.data.data.content.reverse());
-                    setChatId(response.data.data.currentPage);
-                    setTimeout(() => scrollToBottom(), 100);
-                })
-                .catch(error => {
-                    alert(error.response?.data || '채팅 조회 실패');
-                    navigate(-1); 
-                });
-        });
+        // 기존 대화 불러오기
+        getConversation(receiver, 10, chatId, Number(roomId), memberId)
+            .then(response => {
+                console.log(response.data.data.content);
+                setMessages(response.data.data.content.reverse());
+                setChatId(response.data.data.currentPage);
+                setTimeout(() => scrollToBottom(), 100);
+            })
+            .catch(error => {
+                alert(error.response?.data || '채팅 조회 실패');
+                navigate(-1); 
+            });
 
+        // 컴포넌트 언마운트 시 구독 해제
         return () => {
-            disconnect();
+            if (subscription) {
+                subscription.unsubscribe();
+            }
         }; 
-    }, []);
+    }, [roomId, memberId, receiver]);
 
     useEffect(() => {
         scrollToBottom();

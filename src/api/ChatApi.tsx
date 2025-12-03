@@ -10,7 +10,6 @@ export const connect = async (onConnect: () => void) => {
    try {
         await api.post('/api/refresh');
     } catch (error: any) {
-        // 409는 무시 (토큰 유효), 나머지는 로그
         if (error.response?.status !== 409) {
             console.error('토큰 갱신 실패:', error);
         }
@@ -43,7 +42,31 @@ export const connect = async (onConnect: () => void) => {
     stompClient.activate();
 };  
 
-
+export const subscribeNotification = (
+    onNotification: (notification: any) => void
+): StompSubscription | null => {
+    if (!stompClient?.connected) {
+        console.error("stompClient가 연결되지 않음");
+        setTimeout(() => subscribeNotification(onNotification), 1000);
+        return null;
+    }
+    
+    const path = `/user/queue/notify`;
+    
+    try {
+        const subscription = stompClient.subscribe(
+            path,
+            (msg: any) => {
+                onNotification(JSON.parse(msg.body));
+            }
+        );
+        
+        return subscription;
+    } catch (e) {
+        console.error("알림 구독 중 예외 발생:", e);
+        return null;
+    }
+};
 
 
 export const subscribe = (roomId: number, onMessage: (message: any) => void, loginId?: string) => {
@@ -172,18 +195,12 @@ export const requestRandomMatch = (
         console.warn('STOMP 클라이언트가 연결되지 않았습니다.');
         return null;
     }
-    
     const subscribePath = `/user/queue/match`;
-    console.log('🔔 구독 경로:', subscribePath);
-    
     const subscription = stompClient.subscribe(
         subscribePath,
         (msg: any) => {   
             try {
-                console.log("✅ 매칭 메시지 수신!");
-                const data = JSON.parse(msg.body);
-                console.log("매칭 데이터:", data);
-                
+                const data = JSON.parse(msg.body);            
                 // 에러 처리
                 if (data.matched === false && data.error) {
                     console.error('매칭 에러:', data.error);

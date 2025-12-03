@@ -19,8 +19,9 @@ export interface message {  // 채팅 메시지 객체
     receiver: string;   
     content: string;     
     createdAt: string;
-  chatId?: number ;
+    chatId?: number ;
     type?: string;
+    isRead?: boolean;
 }
 
 export interface chatRoom { // 채팅방

@@ -1,6 +1,6 @@
 import { message } from '..';
 import { useEffect, useState, useRef } from "react";
-import { connect, subscribe, sendMessage, disconnect, getConversation, deleteMessage, getReceiverStatus, sendFile } from '../../api/ChatApi';
+import { subscribe, sendMessage, getConversation, deleteMessage, getReceiverStatus, sendFile } from '../../api/ChatApi';
 import { useNavigate } from "react-router-dom";
 import Loading from '../../common/Loading';
 import '../../css/ChatRoom.css';
@@ -77,7 +77,6 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
         try {
             const response = await fetch(url);
             
-            // 404 또는 403 에러 체크 (30일 경과 파일)
             if (!response.ok) {
                 if (response.status === 404 || response.status === 403) {
                     alert('30일이 경과하여 다운로드할 수 없습니다.');
@@ -145,35 +144,37 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
             console.error('회원 상태 조회 실패:', error);
         });
 
-        connect(() => {
-            subscribe(roomId, (newMessage) => {
-                console.log("받은 메시지:", newMessage);
+        // 채팅방 입장 시 구독 시작
+        const subscription = subscribe(roomId, (newMessage) => {
 
-                if (newMessage.type === 'DELETE') {
-                    setMessages(prev => prev.filter(msg => msg.chatId !== newMessage.chatId));
-                    return;
-                }
+            if (newMessage.type === 'DELETE') {
+                setMessages(prev => prev.filter(msg => msg.chatId !== newMessage.chatId));
+                return;
+            }
 
-                // FILE, TEXT 타입 모두 추가
-                if (newMessage.type === 'FILE' || newMessage.type === 'TEXT'|| newMessage.type === 'IMAGE') {
-                    setMessages(prev => [...prev, newMessage]);
-                }
-            }, userInfo.memId);
-            getConversation(receiver, 10, chatId, roomId, userInfo.memId).then(response => {
-                console.log(response.data.data);
-                setMessages(response.data.data.content.reverse());
-                setChatId(response.data.data.currentPage);
-                setTimeout(() => scrollToBottom(), 100);
-            }).catch(error => {
-                alert(error.response.data);
-                navigate(-1);
-            });
+            if (newMessage.type === 'FILE' || newMessage.type === 'TEXT'|| newMessage.type === 'IMAGE') {
+                setMessages(prev => [...prev, newMessage]);
+            }
+        }, userInfo.memId);
+
+        // 기존 대화 불러오기
+        getConversation(receiver, 10, chatId, roomId, userInfo.memId).then(response => {
+            console.log(response.data.data);
+            setMessages(response.data.data.content.reverse());
+            setChatId(response.data.data.currentPage);
+            setTimeout(() => scrollToBottom(), 100);
+        }).catch(error => {
+            alert(error.response.data);
+            navigate(-1);
         });
 
+        // 컴포넌트 언마운트 시 구독 해제
         return () => {
-            disconnect();
+            if (subscription) {
+                subscription.unsubscribe();
+            }
         };
-    }, []);
+    }, [roomId, receiver]);
 
     useEffect(() => {
         scrollToBottom();
@@ -215,11 +216,8 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
 
     const renderMessageContent = (msg: any) => {
         const isMine = msg.sender === userInfo.memId;
-
-        // url과 fileName이 있으면 파일로 처리 (type과 무관하게)
         const isFile = msg.url && msg.fileName;
 
-        // 이미지 타입
         if (isFile && isImageFile(msg.fileName)) {
             return (
                 <div className={`message-bubble file-bubble ${isMine ? 'right' : 'left'}`}>
@@ -230,7 +228,6 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                             className="message-image"
                             onClick={() => window.open(msg.url, '_blank')}
                             onError={(e) => {
-                                // 이미지 로드 실패 시 (30일 경과)
                                 const target = e.target as HTMLImageElement;
                                 target.style.display = 'none';
                                 target.parentElement!.innerHTML = '<div class="expired-file-message">📅 30일이 경과하여 사용할 수 없습니다.</div>';
@@ -258,7 +255,6 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
             );
         }
 
-        // 파일 타입
         if (isFile) {
             return (
                 <div className={`message-bubble file-bubble ${isMine ? 'right' : 'left'}`}>
@@ -283,7 +279,6 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
             );
         }
 
-        // 텍스트 타입
         return (
             <div className={`message-bubble ${isMine ? 'right' : 'left'}`}>
                 <div className="message-content">{msg.content}</div>

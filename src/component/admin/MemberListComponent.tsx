@@ -136,6 +136,11 @@ const MemberListComponent = () => {
         navigate(`/admin/member/${memberId}/chat`);
     };
 
+    // 채팅 내역 확인
+    const handleQnAHistory = (memberId: string): void => {
+        navigate(`/admin/member/${memberId}/chat`);
+    };
+
     // 페이지 변경
     const handlePageChange = (page: number): void => {
         if (page >= 0 && page < totalPages) {
@@ -233,6 +238,7 @@ const MemberListComponent = () => {
                                             >
                                                 채팅내역
                                             </button>
+                                        
                                             <button
                                                 className={`btn btn-sm ${member.status === 'ACTIVE' ? 'btn-danger' : 'btn-secondary'}`}
                                                 onClick={() => handleStatusChange(member.memId, member.status)}
