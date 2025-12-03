@@ -76,7 +76,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     const handleFileDownload = async (url: string, filename: string) => {
         try {
             const response = await fetch(url);
-            
+
             if (!response.ok) {
                 if (response.status === 404 || response.status === 403) {
                     alert('30일이 경과하여 다운로드할 수 없습니다.');
@@ -152,7 +152,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                 return;
             }
 
-            if (newMessage.type === 'FILE' || newMessage.type === 'TEXT'|| newMessage.type === 'IMAGE') {
+            if (newMessage.type === 'FILE' || newMessage.type === 'TEXT' || newMessage.type === 'IMAGE') {
                 setMessages(prev => [...prev, newMessage]);
             }
         }, userInfo.memId);
@@ -217,22 +217,28 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     const renderMessageContent = (msg: any) => {
         const isMine = msg.sender === userInfo.memId;
         const isFile = msg.url && msg.fileName;
-
         if (isFile && isImageFile(msg.fileName)) {
+            const isDeleted = msg.state === 'DELETED';
             return (
                 <div className={`message-bubble file-bubble ${isMine ? 'right' : 'left'}`}>
                     <div className="image-preview-container">
-                        <img
-                            src={msg.url}
-                            alt={msg.fileName}
-                            className="message-image"
-                            onClick={() => window.open(msg.url, '_blank')}
-                            onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.style.display = 'none';
-                                target.parentElement!.innerHTML = '<div class="expired-file-message">📅 30일이 경과하여 사용할 수 없습니다.</div>';
-                            }}
-                        />
+                        {isDeleted ? (
+                            <div className="expired-file-message">
+                                30일이 지나 파일을 불러올 수 없습니다.
+                            </div>
+                        ) : (
+                            <img
+                                src={msg.url}
+                                alt={msg.fileName}
+                                className="message-image"
+                                onClick={() => window.open(msg.url, '_blank')}
+                                onError={(e) => {
+                                    const target = e.target as HTMLImageElement;
+                                    target.style.display = 'none';
+                                    target.parentElement!.innerHTML = '<div class="expired-file-message">파일을 불러올 수 없습니다.</div>';
+                                }}
+                            />
+                        )}
                     </div>
                     <div className="file-info">
                         <div className="file-icon">🖼️</div>
@@ -240,13 +246,15 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
                             <div className="file-name">{msg.fileName}</div>
                             <div className="file-size-display">{formatFileSize(msg.fileSize || 0)}</div>
                         </div>
-                        <button
-                            className="file-download-btn"
-                            onClick={() => handleFileDownload(msg.url, msg.fileName)}
-                            title="다운로드"
-                        >
-                            ⬇️
-                        </button>
+                        {!isDeleted && (
+                            <button
+                                className="file-download-btn"
+                                onClick={() => handleFileDownload(msg.url, msg.fileName)}
+                                title="다운로드"
+                            >
+                                ⬇️
+                            </button>
+                        )}
                     </div>
                     <div className={`message-time ${isMine ? 'right' : 'left'}`}>
                         {formatDateTime(msg.createdAt)}

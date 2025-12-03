@@ -1,7 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-//const serverPort = 'http://localhost:8080';
-const serverPort = process.env.REACT_APP_SERVER_PORT;
+const serverPort = 'http://localhost:8080';
+//const serverPort = process.env.REACT_APP_SERVER_PORT;
 const api = axios.create({
     baseURL: serverPort,
     withCredentials: true
