@@ -11,7 +11,10 @@ interface Notification {
     receiver: string;
     content: string;
     createdAt: string;
-    type: string;
+    type: string; 
+    url?: string;
+    fileName?: string;
+    fileSize?: number;
 }
 
 const Header = () => {
@@ -27,21 +30,13 @@ const Header = () => {
     const username = userInfo?.name;
 
     useEffect(() => {
-        if (userInfo) {
-            // 연결 안되어 있으면 먼저 연결
-            if (!isConnected()) {
-                connect(() => {
-                    setupSubscription();
-                });
-            } else {
-                // 이미 연결되어 있으면 바로 구독
-                setupSubscription();
-            }
-        }
+        if (!userInfo) return;
 
-        function setupSubscription() {
+        let subscription: any = null;
+
+        const setupSubscription = () => {
             // 알림 구독
-            const subscription = subscribeNotification((notification: Notification) => {
+            subscription = subscribeNotification((notification: Notification) => {
                 console.log("🔔 새 알림 수신:", notification);
                 
                 setNotifications(prev => [notification, ...prev]);
@@ -49,24 +44,44 @@ const Header = () => {
                 
                 // 브라우저 알림 (권한 있을 경우)
                 if (Notification.permission === "granted") {
+                    let body = '';
+                    if (notification.type === 'IMAGE') {
+                        body = `${notification.sender}님이 이미지를 보냈습니다`;
+                    } else if (notification.type === 'FILE') {
+                        body = `${notification.sender}님이 ${notification.fileName || '파일'}을 보냈습니다`;
+                    } else {
+                        body = `${notification.sender}: ${notification.content.substring(0, 50)}`;
+                    }
+                    
                     new Notification("새 메시지", {
-                        body: `${notification.sender}: ${notification.content.substring(0, 50)}`,
+                        body: body,
                         icon: "/chat-icon.png"
                     });
                 }
             });
+        };
 
-            // 브라우저 알림 권한 요청
-            if (Notification.permission === "default") {
-                Notification.requestPermission();
-            }
-
-            return () => {
-                if (subscription) {
-                    subscription.unsubscribe();
-                }
-            };
+        // 연결 안되어 있으면 먼저 연결
+        if (!isConnected()) {
+            connect(() => {
+                setupSubscription();
+            });
+        } else {
+            // 이미 연결되어 있으면 바로 구독
+            setupSubscription();
         }
+
+        // 브라우저 알림 권한 요청
+        if (Notification.permission === "default") {
+            Notification.requestPermission();
+        }
+
+        // cleanup 함수
+        return () => {
+            if (subscription) {
+                subscription.unsubscribe();
+            }
+        };
     }, [userInfo]);
 
     const handleLogout = () => {
@@ -201,9 +216,17 @@ const Header = () => {
                                                             {notif.sender}
                                                         </div>
                                                         <div className="notification-content">
-                                                            {notif.content.length > 50 
-                                                                ? notif.content.substring(0, 50) + '...' 
-                                                                : notif.content}
+                                                            {notif.type === 'IMAGE' ? (
+                                                                <span>🖼️ 이미지를 보냈습니다</span>
+                                                            ) : notif.type === 'FILE' ? (
+                                                                <span>📎 {notif.fileName || '파일'}을 보냈습니다</span>
+                                                            ) : (
+                                                                <>
+                                                                    {notif.content.length > 50 
+                                                                        ? notif.content.substring(0, 50) + '...' 
+                                                                        : notif.content}
+                                                                </>
+                                                            )}
                                                         </div>
                                                         <div className="notification-time">
                                                             {formatTime(notif.createdAt)}
