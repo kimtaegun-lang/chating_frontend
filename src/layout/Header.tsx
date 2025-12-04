@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { signOut } from "../api/MemberApi";
-import { subscribeNotification } from "../api/ChatApi";
+import { connect, disconnect, subscribeNotification, isConnected } from "../api/ChatApi";
 import '../css/Header.css'
 
 interface Notification {
@@ -28,6 +28,18 @@ const Header = () => {
 
     useEffect(() => {
         if (userInfo) {
+            // 연결 안되어 있으면 먼저 연결
+            if (!isConnected()) {
+                connect(() => {
+                    setupSubscription();
+                });
+            } else {
+                // 이미 연결되어 있으면 바로 구독
+                setupSubscription();
+            }
+        }
+
+        function setupSubscription() {
             // 알림 구독
             const subscription = subscribeNotification((notification: Notification) => {
                 console.log("🔔 새 알림 수신:", notification);
@@ -62,6 +74,7 @@ const Header = () => {
             .then((response) => {
                 alert(response.data);
                 sessionStorage.removeItem('userInfo');
+                disconnect();
                 navigate('/');
             })
             .catch((error) => {
