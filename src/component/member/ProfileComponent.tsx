@@ -1,43 +1,35 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { updateMemberInfo, deleteMember, validateAndGetUserInfo } from "../../api/MemberApi";
-import { updateMemberData, updateFormData } from "..";
+import { updateMemberInfo, deleteMember } from "../../api/MemberApi";
+import { updateFormData } from "..";
 import Loading from '../../common/Loading';
 import '../../css/Profile.css';
 import '../../css/MemberList.css';
 
 const ProfileComponent = () => {
   const navigate = useNavigate();
-  const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
+  const [userInfo, setUserInfo] = useState(() => 
+  JSON.parse(sessionStorage.getItem("userInfo") || "null")
+);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [confirmPwd, setConfirmPwd] = useState<string>("");
   const [formData, setFormData] = useState<updateFormData>({
     email: userInfo?.email || "",
     phone: userInfo?.phone || "",
     addr: userInfo?.addr || "",
     currentPwd: "",
-    newPwd: "",
-    confirmPwd: "",
+    newPwd: ""
   });
 
 
   useEffect(() => {
-
         if (!userInfo) {
             alert('로그인이 필요합니다.');
             navigate('../../member/signIn');
             return;
         }
-
-    setFormData({
-      email: userInfo.email || "",
-      phone: userInfo.phone || "",
-      addr: userInfo.addr || "",
-      currentPwd: "",
-      newPwd: "",
-      confirmPwd: "",
-    });
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,52 +41,41 @@ const ProfileComponent = () => {
   };
 
   const handleUpdate = async () => {
-    if (formData.newPwd) {
-      if (formData.newPwd !== formData.confirmPwd) {
-        alert("새 비밀번호가 일치하지 않습니다.");
-        return;
-      }
-      if (!formData.currentPwd) {
-        alert("현재 비밀번호를 입력해주세요.");
-        return;
-      }
+  if (formData.newPwd) {
+    if (formData.newPwd !== confirmPwd) {
+      alert("새 비밀번호가 일치하지 않습니다.");
+      return;
     }
-
-    try {
-      setLoading(true);
-
-      const updateData: updateMemberData = {
-        email: formData.email,
-        phone: formData.phone,
-        addr: formData.addr,
-      };
-
-      if (formData.newPwd) {
-        updateData.currentPwd = formData.currentPwd;
-        updateData.newPwd = formData.newPwd;
-      }
-
-      await updateMemberInfo(updateData);
+    if (!formData.currentPwd) {
+      alert("현재 비밀번호를 입력해주세요.");
+      return;
+    }
+  }
+  
+  setLoading(true);
+  setIsEditing(false);
+  
+  const { currentPwd, newPwd, ...basicData } = formData;
+  
+  const dataToSend = formData.newPwd?.trim() 
+    ? formData  
+    : basicData; 
+  
+  updateMemberInfo(dataToSend)
+    .then(response => {
+      const updatedInfo = response.data.updatedMember
+      sessionStorage.removeItem("userInfo");
+      sessionStorage.setItem("userInfo", JSON.stringify(updatedInfo));
+       setUserInfo(updatedInfo);
       alert("회원 정보가 수정되었습니다.");
-
-
-      setIsEditing(false);
-      setFormData((prev: updateFormData) => ({
-        ...prev,
-        currentPwd: "",
-        newPwd: "",
-        confirmPwd: "",
-      }));
-    } catch (err: any) {
-      console.error(err);
-      alert(err.response?.data?.message || "회원 정보 수정에 실패했습니다.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+    })
+    .catch(error => {
+      console.error('회원 상태 조회 실패:', error);   
+    });
+}
+        
   const handleDelete = async () => {
-    if (!window.confirm("정말로 회원 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.")) {
+    if (!window.confirm("정말로 회원 탈퇴하시겠습니까?")) {
       return;
     }
 
@@ -264,7 +245,7 @@ const ProfileComponent = () => {
                     <input
                       type="password"
                       name="confirmPwd"
-                      value={formData.confirmPwd}
+                      value={confirmPwd}
                       onChange={handleInputChange}
                       placeholder="새 비밀번호 확인"
                       className="profile-input"
@@ -294,8 +275,7 @@ const ProfileComponent = () => {
                     phone: userInfo.phone || "",
                     addr: userInfo.addr || "",
                     currentPwd: "",
-                    newPwd: "",
-                    confirmPwd: "",
+                    newPwd: ""
                   });
                 }}
               >
@@ -307,7 +287,7 @@ const ProfileComponent = () => {
         )}
       </div>
     </div>
-  );
+  ); 
 };
-
+      
 export default ProfileComponent;

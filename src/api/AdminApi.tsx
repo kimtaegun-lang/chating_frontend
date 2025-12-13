@@ -28,9 +28,9 @@ export const getMemberDetail = async (memberId: string) => {
 
 // 회원 상태 변경
 export const updateMemberStatus = async (memberId: string, status: string) => {
-    const response = await api.put(`${admin}/members/${memberId}/status`, {
+    const response = await api.patch(`${admin}/members/${memberId}/status`,null, {params:{
         status: status
-    });
+    }});
     return response;
 }
 

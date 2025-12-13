@@ -8,7 +8,7 @@ import '../../css/ChatRoom.css';
 const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: string }) => {
     const [messages, setMessages] = useState<message[]>([]);
     const [input, setInput] = useState('');
-    const [chatId, setChatId] = useState<number>(0);
+    const [createdAt, setCreatedAt] = useState<string>(''); // 가장 오래된 메시지의 생성일자
     const [isLoading, setIsLoading] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [filePreview, setFilePreview] = useState<string | null>(null);
@@ -19,6 +19,7 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     const [isReceiverActive, setIsReceiverActive] = useState<boolean>();
     const navigate = useNavigate();
     const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
+    const [hasMsg, setHasMsg] = useState(true);
 
     const scrollToBottom = () => {
         if (scrollContainerRef.current) {
@@ -157,15 +158,13 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
             }
         }, userInfo.memId);
 
-        // 기존 대화 불러오기
-        getConversation(receiver, 10, chatId, roomId, userInfo.memId).then(response => {
-            console.log(response.data.data);
-            setMessages(response.data.data.content.reverse());
-            setChatId(response.data.data.currentPage);
+          getConversation(receiver, 10, createdAt, roomId, userInfo.memId).then(response => {
+           setMessages(response.data.data.reverse());
+           setCreatedAt(response.data.data[0].createdAt);
             setTimeout(() => scrollToBottom(), 100);
         }).catch(error => {
-            alert(error.response.data);
-            navigate(-1);
+         alert('채팅방 정보를 불러오지 못했습니다.');
+        navigate(-1);
         });
 
         // 컴포넌트 언마운트 시 구독 해제
@@ -181,24 +180,21 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
     }, [messages]);
 
     const handleScroll = () => {
+        if(hasMsg === false) return;
         const container = scrollContainerRef.current;
-        if (!container || isLoading || chatId === 0) return;
-
+         if (!container || isLoading || createdAt === null) return;
         if (container.scrollTop === 0) {
             setIsLoading(true);
             prevScrollHeightRef.current = container.scrollHeight;
 
-            const stored = sessionStorage.getItem('userInfo');
-            const sessionUser = stored ? JSON.parse(stored) : null;
-            const effectiveUser = userInfo ?? sessionUser;
-
-            getConversation(receiver, 10, chatId, roomId, effectiveUser?.memId).then(response => {
-                console.log(response.data.data);
-                const newMessages = response.data.data.content.reverse();
-                const newChatId = response.data.data.currentPage;
-
+             getConversation(receiver, 10, createdAt, roomId, userInfo?.memId).then(response => {
+                const newMessages = response.data.data.reverse();
+                
+                if(newMessages.length < 10){
+                    setHasMsg(false);
+                }
                 setMessages(prev => [...newMessages, ...prev]);
-                setChatId(newChatId);
+               setCreatedAt(response.data.data[0].createdAt);
 
                 setTimeout(() => {
                     if (container) {

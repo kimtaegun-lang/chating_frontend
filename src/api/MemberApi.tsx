@@ -2,7 +2,7 @@ import axios from "axios";
 import { serverPort } from "./RootApi";
 import { userInfo,signInData } from "../component";
 import { api } from './RootApi';
-import { updateMemberData } from "../component";
+import { updateFormData } from "../component";
 const member = `${serverPort}/member`;
 
 // 회원가입
@@ -37,8 +37,9 @@ export const getUserInfo=async()=> {
 }
 
 // 회원 정보 수정
-export const updateMemberInfo = async (updateData: updateMemberData) => {
-    const response = await api.put(`${member}/updateMemberInfo`, updateData);
+export const updateMemberInfo = async (updateData: updateFormData) => {
+    console.log(updateData);
+    const response = await api.patch(`${member}/updateMemberInfo`, updateData);
     return response;
 }
 // 회원 탈퇴

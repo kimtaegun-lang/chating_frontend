@@ -7,7 +7,7 @@ import '../../css/ChatRoom.css';
 
 const AdminChatRoomComponent = () => {
     const [messages, setMessages] = useState<message[]>([]);
-    const [chatId, setChatId] = useState<number>(0);
+    const [createdAt, setCreatedAt] = useState<string>(''); // 가장 오래된 메시지의 생성일자
     const [isLoading, setIsLoading] = useState(false);
     const { memberId, roomId, receiver } = useParams<{ memberId: string; roomId: string; receiver: string }>();
     const messageEndRef = useRef<HTMLDivElement | null>(null);
@@ -15,6 +15,8 @@ const AdminChatRoomComponent = () => {
     const prevScrollHeightRef = useRef<number>(0);
     const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
     const navigate = useNavigate();
+    const [hasMsg, setHasMsg] = useState(true);
+
 
     const scrollToBottom = () => {
         if (scrollContainerRef.current) {
@@ -109,7 +111,7 @@ const AdminChatRoomComponent = () => {
             }
         }, memberId);
 
-        // 기존 대화 불러오기
+        /* 기존 대화 불러오기
         getConversation(receiver, 10, chatId, Number(roomId), memberId)
             .then(response => {
                 console.log(response.data.data.content);
@@ -120,7 +122,16 @@ const AdminChatRoomComponent = () => {
             .catch(error => {
                 alert(error.response?.data || '채팅 조회 실패');
                 navigate(-1); 
-            });
+            }); */
+
+         getConversation(receiver, 10, createdAt, Number(roomId), userInfo.memId).then(response => {
+           setMessages(response.data.data.reverse());
+           setCreatedAt(response.data.data[0].createdAt);
+            setTimeout(() => scrollToBottom(), 100);
+        }).catch(error => {
+         alert('채팅방 정보를 불러오지 못했습니다.');
+        navigate(-1);
+        });
 
         // 컴포넌트 언마운트 시 구독 해제
         return () => {
@@ -136,12 +147,13 @@ const AdminChatRoomComponent = () => {
 
     const handleScroll = () => {
         const container = scrollContainerRef.current;
-        if (!container || isLoading || chatId === 0) return;
-
+        // if (!container || isLoading || chatId === 0) return;
+            if (!container || isLoading || createdAt === null) return;
         if (container.scrollTop === 0) {
             setIsLoading(true);
             prevScrollHeightRef.current = container.scrollHeight;
 
+            /*
             getConversation(receiver!, 10, chatId, Number(roomId), memberId!)
                 .then(response => {
                     const newMessages = response.data.data.content.reverse();
@@ -161,7 +173,28 @@ const AdminChatRoomComponent = () => {
                 .catch(error => {
                     console.error(error);
                     setIsLoading(false);
-                });
+                }); */
+
+                  getConversation(receiver!, 10, createdAt, Number(roomId), userInfo?.memId).then(response => {
+                const newMessages = response.data.data.reverse();
+                
+                if(newMessages.length < 10){
+                    setHasMsg(false);
+                }
+                setMessages(prev => [...newMessages, ...prev]);
+               setCreatedAt(response.data.data[0].createdAt);
+
+                setTimeout(() => {
+                    if (container) {
+                        const newScrollHeight = container.scrollHeight;
+                        container.scrollTop = newScrollHeight - prevScrollHeightRef.current;
+                    }
+                    setIsLoading(false);
+                }, 100);
+            }).catch(error => {
+                console.error(error);
+                setIsLoading(false);
+            });
         }
     };
 

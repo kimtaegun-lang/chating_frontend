@@ -2,6 +2,7 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { serverPort, api } from './RootApi';
 import { StompSubscription } from '@stomp/stompjs';
+import { off } from 'process';
 let stompClient: Client | null = null;
 const chat = `${serverPort}/api/chat`;
 
@@ -173,18 +174,17 @@ export const getMyChatRooms = async (pageCount:number, size:number, userId?: str
     return response;
 };
 
-export const getConversation = async (user2: string, limit: number, chatId: number, roomId: number, user1?: string) => {
-    console.log(user1, user2, limit, chatId);
-    const response = await api.post(`${chat}/getConversation`, {
+export const getConversation = async (user2: string, limit: number, createdAt: string, roomId: number, user1: string) => {
+    console.log(user1, user2, limit, createdAt);
+    const response = await api.get(`${chat}/getConversation`, {params:{
         user1,
         user2,
         limit,
-        chatId,
+        createdAt,
         roomId
-    });
+    }});
     return response;
 };
-
 
 export const requestRandomMatch = (
     onMatch: (data: any) => void,
