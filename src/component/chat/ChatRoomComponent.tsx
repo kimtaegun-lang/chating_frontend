@@ -159,11 +159,14 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
         }, userInfo.memId);
 
           getConversation(receiver, 10, createdAt, roomId, userInfo.memId).then(response => {
+            if(response.data.data) {
            setMessages(response.data.data.reverse());
            setCreatedAt(response.data.data[0].createdAt);
+            }
             setTimeout(() => scrollToBottom(), 100);
         }).catch(error => {
-         alert('채팅방 정보를 불러오지 못했습니다.');
+            console.log(error);
+        alert('채팅방 정보를 불러오지 못했습니다.');
         navigate(-1);
         });
 

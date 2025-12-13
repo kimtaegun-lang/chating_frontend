@@ -175,7 +175,7 @@ export const getMyChatRooms = async (pageCount:number, size:number, userId?: str
 };
 
 export const getConversation = async (user2: string, limit: number, createdAt: string, roomId: number, user1: string) => {
-    console.log(user1, user2, limit, createdAt);
+    console.log(user1, user2, limit, createdAt,roomId);
     const response = await api.get(`${chat}/getConversation`, {params:{
         user1,
         user2,
