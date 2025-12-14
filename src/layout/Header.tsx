@@ -29,20 +29,17 @@ const Header = () => {
     const isAdmin = userInfo?.role === 'ADMIN';
     const username = userInfo?.name;
 
+    // WebSocket 연결 및 알림 구독
     useEffect(() => {
         if (!userInfo) return;
 
         let subscription: any = null;
 
         const setupSubscription = () => {
-            // 알림 구독
-            subscription = subscribeNotification((notification: Notification) => {
-                console.log("🔔 새 알림 수신:", notification);
-                
+            subscription = subscribeNotification((notification: Notification) => {               
                 setNotifications(prev => [notification, ...prev]);
                 setUnreadCount(prev => prev + 1);
                 
-                // 브라우저 알림 (권한 있을 경우)
                 if (Notification.permission === "granted") {
                     let body = '';
                     if (notification.type === 'IMAGE') {
@@ -61,22 +58,18 @@ const Header = () => {
             });
         };
 
-        // 연결 안되어 있으면 먼저 연결
         if (!isConnected()) {
             connect(() => {
                 setupSubscription();
             });
         } else {
-            // 이미 연결되어 있으면 바로 구독
             setupSubscription();
         }
 
-        // 브라우저 알림 권한 요청
         if (Notification.permission === "default") {
             Notification.requestPermission();
         }
 
-        // cleanup 함수
         return () => {
             if (subscription) {
                 subscription.unsubscribe();
@@ -84,11 +77,49 @@ const Header = () => {
         };
     }, [userInfo]);
 
+    // 다른 탭에서 다른 계정 로그인
+    useEffect(() => {
+        const handleStorageChange = (e: StorageEvent) => {
+            if (e.key === "logined") {
+                const currentUserInfo = sessionStorage.getItem("userInfo");
+                const newLogined = e.newValue;
+                
+                if (currentUserInfo && newLogined) {
+                    const current = JSON.parse(currentUserInfo);
+                    
+                    // 다른 계정이 로그인됨
+                    if (current.memId !== newLogined) {
+                        alert("다른 탭에서 다른 계정이 로그인되었습니다.");
+                        
+                        disconnect();
+                        sessionStorage.clear();
+                        navigate('/member/signIn');
+                    }
+                }
+                
+                // logined가 삭제됨 
+                if (e.oldValue && !e.newValue) {
+                    alert("다른 탭에서 로그아웃되었습니다.");
+                    disconnect();
+                    sessionStorage.clear();
+                    navigate('/member/signIn');
+                }
+            }
+        };
+        
+        window.addEventListener("storage", handleStorageChange);
+        
+        return () => {
+            window.removeEventListener("storage", handleStorageChange);
+        };
+    }, [navigate]);
+
     const handleLogout = () => {
         signOut()
             .then((response) => {
                 alert(response.data);
                 sessionStorage.removeItem('userInfo');
+                localStorage.removeItem("logined");
                 disconnect();
                 navigate('/');
             })
@@ -98,11 +129,9 @@ const Header = () => {
     };
 
     const handleNotificationClick = (notification: Notification) => {
-        // 알림 클릭 시 해당 채팅방으로 이동
         navigate(`/chat/room/${notification.chatRoomId}/${notification.sender}`);
         setShowNotifications(false);
         
-        // 읽음 처리
         setNotifications(prev => prev.filter(n => n.chatId !== notification.chatId));
         setUnreadCount(prev => Math.max(0, prev - 1));
     };
@@ -110,7 +139,6 @@ const Header = () => {
     const handleNotificationIconClick = () => {
         setShowNotifications(!showNotifications);
         if (!showNotifications) {
-            // 알림창 열 때 읽음 표시 (카운트만 초기화)
             setUnreadCount(0);
         }
     };
@@ -175,7 +203,6 @@ const Header = () => {
                 <div className="header-user">
                     {userInfo ? (
                         <>
-                            {/* 알림 아이콘 */}
                             <div className="notification-container">
                                 <button 
                                     className="notification-btn"
@@ -239,7 +266,6 @@ const Header = () => {
                                 )}
                             </div>
 
-                            {/* 사용자 드롭다운 */}
                             <div className="user-dropdown">
                                 <button 
                                     className="user-btn"

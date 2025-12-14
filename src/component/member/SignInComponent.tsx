@@ -43,6 +43,7 @@ const SignInComponent = () => {
                     const info = await validateAndGetUserInfo();
                     const userInfo = info.data.userInfo;
                     sessionStorage.setItem("userInfo", JSON.stringify(userInfo));
+                    localStorage.setItem("logined", userInfo.memId);
                 } catch (e: any) {
                     alert(e.data);
                 }
