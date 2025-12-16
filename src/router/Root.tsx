@@ -5,7 +5,7 @@ import MemberRouter from "./MemberRouter";
 import ChatRouter from "./ChatRouter";
 import AdminRouter from "./AdminRouter";
 
-const Loading = lazy(() => import("../common/Loading"));
+const Loading=lazy(()=>import("../component/common/Loading"));
 const Main = lazy(() => import("../pages/MainPage"));
 
 const Root = createBrowserRouter([

@@ -2,7 +2,7 @@ import { message } from '..';
 import { useEffect, useState, useRef } from "react";
 import { subscribe, sendMessage, getConversation, deleteMessage, getReceiverStatus, sendFile } from '../../api/ChatApi';
 import { useNavigate } from "react-router-dom";
-import Loading from '../../common/Loading';
+import Loading from '../common/Loading';
 import '../../css/ChatRoom.css';
 
 const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: string }) => {
@@ -159,10 +159,11 @@ const ChatRoomComponent = ({ roomId, receiver }: { roomId: number; receiver: str
         }, userInfo.memId);
 
           getConversation(receiver, 10, createdAt, roomId, userInfo.memId).then(response => {
-            if(response.data.data) {
-           setMessages(response.data.data.reverse());
-           setCreatedAt(response.data.data[0].createdAt);
-            }
+                console.log(response.data.data);
+              if(response.data.data && response.data.data.length > 0) {
+        setMessages(response.data.data.reverse());
+        setCreatedAt(response.data.data[0].createdAt);
+    } 
             setTimeout(() => scrollToBottom(), 100);
         }).catch(error => {
             console.log(error);

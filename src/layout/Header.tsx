@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { signOut } from "../api/MemberApi";
-import { connect, disconnect, subscribeNotification, isConnected } from "../api/ChatApi";
+import { disconnect, subscribeNotification } from "../api/ChatApi";
+import { useWebSocket } from "../context/WebSocketContext";
 import '../css/Header.css'
 
 interface Notification {
@@ -20,6 +21,7 @@ interface Notification {
 const Header = () => {
     const navigate = useNavigate();
     const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
+    const { isConnected } = useWebSocket();
     const [showDropdown, setShowDropdown] = useState(false);
     const [showAdminDropdown, setShowAdminDropdown] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
@@ -29,42 +31,31 @@ const Header = () => {
     const isAdmin = userInfo?.role === 'ADMIN';
     const username = userInfo?.name;
 
-    // WebSocket 연결 및 알림 구독
+    // WebSocket 연결 완료 후 알림 구독
     useEffect(() => {
-        if (!userInfo) return;
+        if (!userInfo || !isConnected) return;
 
-        let subscription: any = null;
-
-        const setupSubscription = () => {
-            subscription = subscribeNotification((notification: Notification) => {               
-                setNotifications(prev => [notification, ...prev]);
-                setUnreadCount(prev => prev + 1);
-                
-                if (Notification.permission === "granted") {
-                    let body = '';
-                    if (notification.type === 'IMAGE') {
-                        body = `${notification.sender}님이 이미지를 보냈습니다`;
-                    } else if (notification.type === 'FILE') {
-                        body = `${notification.sender}님이 ${notification.fileName || '파일'}을 보냈습니다`;
-                    } else {
-                        body = `${notification.sender}: ${notification.content.substring(0, 50)}`;
-                    }
-                    
-                    new Notification("새 메시지", {
-                        body: body,
-                        icon: "/chat-icon.png"
-                    });
+        // 연결 완료 후 구독만 진행
+        const subscription = subscribeNotification((notification: Notification) => {               
+            setNotifications(prev => [notification, ...prev]);
+            setUnreadCount(prev => prev + 1);
+            
+            if (Notification.permission === "granted") {
+                let body = '';
+                if (notification.type === 'IMAGE') {
+                    body = `${notification.sender}님이 이미지를 보냈습니다`;
+                } else if (notification.type === 'FILE') {
+                    body = `${notification.sender}님이 ${notification.fileName || '파일'}을 보냈습니다`;
+                } else {
+                    body = `${notification.sender}: ${notification.content.substring(0, 50)}`;
                 }
-            });
-        };
-
-        if (!isConnected()) {
-            connect(() => {
-                setupSubscription();
-            });
-        } else {
-            setupSubscription();
-        }
+                
+                new Notification("새 메시지", {
+                    body: body,
+                    icon: "/chat-icon.png"
+                });
+            }
+        });
 
         if (Notification.permission === "default") {
             Notification.requestPermission();
@@ -75,7 +66,7 @@ const Header = () => {
                 subscription.unsubscribe();
             }
         };
-    }, [userInfo]);
+    }, [userInfo, isConnected]);
 
     // 다른 탭에서 다른 계정 로그인
     useEffect(() => {
@@ -244,7 +235,7 @@ const Header = () => {
                                                         </div>
                                                         <div className="notification-content">
                                                             {notif.type === 'IMAGE' ? (
-                                                                <span>🖼️ 이미지를 보냈습니다</span>
+                                                                <span> 이미지를 보냈습니다</span>
                                                             ) : notif.type === 'FILE' ? (
                                                                 <span>📎 {notif.fileName || '파일'}을 보냈습니다</span>
                                                             ) : (

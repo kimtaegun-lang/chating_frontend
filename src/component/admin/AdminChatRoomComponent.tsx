@@ -2,7 +2,7 @@ import { message } from '..';
 import { useEffect, useState, useRef } from "react";
 import { subscribe, getConversation, deleteMessage } from '../../api/ChatApi';
 import { useNavigate, useParams } from "react-router-dom";
-import Loading from '../../common/Loading';
+import Loading from '../common/Loading';
 import '../../css/ChatRoom.css';
 
 const AdminChatRoomComponent = () => {
@@ -111,22 +111,11 @@ const AdminChatRoomComponent = () => {
             }
         }, memberId);
 
-        /* 기존 대화 불러오기
-        getConversation(receiver, 10, chatId, Number(roomId), memberId)
-            .then(response => {
-                console.log(response.data.data.content);
-                setMessages(response.data.data.content.reverse());
-                setChatId(response.data.data.currentPage);
-                setTimeout(() => scrollToBottom(), 100);
-            })
-            .catch(error => {
-                alert(error.response?.data || '채팅 조회 실패');
-                navigate(-1); 
-            }); */
-
-         getConversation(receiver, 10, createdAt, Number(roomId), userInfo.memId).then(response => {
-           setMessages(response.data.data.reverse());
+         getConversation(receiver, 10, createdAt, Number(roomId), memberId).then(response => {
+                if(response.data.data && response.data.data.length > 0) {
+            setMessages(response.data.data.reverse());
            setCreatedAt(response.data.data[0].createdAt);
+            }
             setTimeout(() => scrollToBottom(), 100);
         }).catch(error => {
          alert('채팅방 정보를 불러오지 못했습니다.');
@@ -147,35 +136,12 @@ const AdminChatRoomComponent = () => {
 
     const handleScroll = () => {
         const container = scrollContainerRef.current;
-        // if (!container || isLoading || chatId === 0) return;
-            if (!container || isLoading || createdAt === null) return;
+                if (!container || isLoading || createdAt === null || !memberId) return;
         if (container.scrollTop === 0) {
             setIsLoading(true);
             prevScrollHeightRef.current = container.scrollHeight;
 
-            /*
-            getConversation(receiver!, 10, chatId, Number(roomId), memberId!)
-                .then(response => {
-                    const newMessages = response.data.data.content.reverse();
-                    const newChatId = response.data.data.currentPage;
-                    
-                    setMessages(prev => [...newMessages, ...prev]);
-                    setChatId(newChatId);
-                    
-                    setTimeout(() => {
-                        if (container) {
-                            const newScrollHeight = container.scrollHeight;
-                            container.scrollTop = newScrollHeight - prevScrollHeightRef.current;
-                        }
-                        setIsLoading(false);
-                    }, 100);
-                })
-                .catch(error => {
-                    console.error(error);
-                    setIsLoading(false);
-                }); */
-
-                  getConversation(receiver!, 10, createdAt, Number(roomId), userInfo?.memId).then(response => {
+                  getConversation(receiver!, 10, createdAt, Number(roomId), memberId).then(response => {
                 const newMessages = response.data.data.reverse();
                 
                 if(newMessages.length < 10){
@@ -192,8 +158,8 @@ const AdminChatRoomComponent = () => {
                     setIsLoading(false);
                 }, 100);
             }).catch(error => {
-                console.error(error);
-                setIsLoading(false);
+                alert('채팅방 정보를 불러오지 못했습니다.');
+                  navigate(-1);
             });
         }
     };

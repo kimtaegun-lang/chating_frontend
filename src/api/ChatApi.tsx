@@ -2,7 +2,6 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { serverPort, api } from './RootApi';
 import { StompSubscription } from '@stomp/stompjs';
-import { off } from 'process';
 let stompClient: Client | null = null;
 const chat = `${serverPort}/api/chat`;
 
@@ -175,7 +174,7 @@ export const getMyChatRooms = async (pageCount:number, size:number, userId?: str
 };
 
 export const getConversation = async (user2: string, limit: number, createdAt: string, roomId: number, user1: string) => {
-    console.log(user1, user2, limit, createdAt,roomId);
+    console.log("회원1:"+user1, "회원2:"+user2, "갯수"+limit, "생성일"+createdAt,"방번호:"+roomId);
     const response = await api.get(`${chat}/getConversation`, {params:{
         user1,
         user2,

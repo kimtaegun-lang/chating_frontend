@@ -3,7 +3,7 @@ const MemberListPage =lazy(()=>import("../pages/admin/MemberListPage"));
 const MemberDetailComponent=lazy(()=>import("../pages/admin/MemberDetailPage"));
 const AdminChatListPage=lazy(()=>import("../pages/admin/AdminChatListPage"));
 const AdminChatRoomPage=lazy(()=>import("../pages/admin/AdminChatRoomPage"));
-const Loading=lazy(()=>import("../common/Loading"));
+const Loading=lazy(()=>import("../component/common/Loading"));
 const AdminRouter = () => {
    return [
         {

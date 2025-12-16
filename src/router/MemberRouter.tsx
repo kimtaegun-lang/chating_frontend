@@ -2,7 +2,7 @@ import {lazy,Suspense} from "react";
 const SignInPage =lazy(()=>import("../pages/member/SignInPage"));
 const SignUpPage=lazy(()=>import("../pages/member/SignUpPage"));
 const ProfilePage=lazy(()=>import("../pages/member/ProfilePage"));
-const Loading=lazy(()=>import("../common/Loading"));
+const Loading=lazy(()=>import("../component/common/Loading"));
 const MemberRouter = () => {
    return [
         {

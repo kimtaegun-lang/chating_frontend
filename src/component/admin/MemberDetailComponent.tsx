@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getMemberDetail } from "../../api/AdminApi";
 import { useNavigate } from "react-router-dom";
-import Loading from '../../common/Loading';
+import Loading from '../common/Loading';
 import '../../css/MemberList.css';
 
 const MemberDetailComponent = ({ memberId }: { memberId: string }) => {

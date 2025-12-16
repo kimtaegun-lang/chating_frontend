@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { updateMemberInfo, deleteMember } from "../../api/MemberApi";
 import { updateFormData } from "..";
-import Loading from '../../common/Loading';
+import Loading from '../common/Loading';
 import '../../css/Profile.css';
 import '../../css/MemberList.css';
 

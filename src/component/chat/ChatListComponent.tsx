@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { getMyChatRooms } from '../../api/ChatApi';
 import { chatRoom } from '..';
 import PageComponent from '../common/PageComponent';
-import Loading from '../../common/Loading';
+import Loading from '../common/Loading';
 import '../../css/ChatList.css';
 
 const ChatListComponent = () => {

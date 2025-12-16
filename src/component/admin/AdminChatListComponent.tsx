@@ -4,7 +4,7 @@ import { getMyChatRooms } from '../../api/ChatApi';
 import { deleteRoom } from '../../api/AdminApi';
 import { chatRoom } from '..';
 import PageComponent from '../common/PageComponent';
-import Loading from '../../common/Loading';
+import Loading from '../common/Loading';
 import '../../css/ChatList.css';
 
 const AdminChatListComponent = () => {
