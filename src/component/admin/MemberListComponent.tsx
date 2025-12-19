@@ -149,15 +149,11 @@ const MemberListComponent = () => {
         }
     };
 
-
-
-    if (loading) {
-        <Loading/>
-    }
-
     const sortedMembers = getSortedMembers();
 
     return (
+        <>
+        {loading && <Loading />}
         <div className="main-container">
             <div className="main-content">
                 <h2 className="main-title">👥 회원 관리</h2>
@@ -266,6 +262,7 @@ const MemberListComponent = () => {
                 />
             </div>
         </div>
+        </>
     );
 };
 

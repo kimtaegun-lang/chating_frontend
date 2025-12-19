@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StompSubscription } from '@stomp/stompjs';
 import { requestRandomMatch, cancelRandomMatch } from '../../api/ChatApi';
+import Loading from '../common/Loading';
 import '../../css/ChatMatching.css';
 
 const ChatMatchingComponent = () => {
@@ -11,15 +12,16 @@ const ChatMatchingComponent = () => {
     const subscriptionRef = useRef<StompSubscription | null>(null);
     const hasStartedRef = useRef(false);
     const navigate = useNavigate();
+    const [loading,setLoading] = useState(false);
     const userInfo = JSON.parse(sessionStorage.getItem("userInfo") || "null");
 
     useEffect(() => {
+
         if(userInfo.role === 'ADMIN') {
             alert('일반 회원만 매칭 기능을 이용하실 수 있습니다.');
             navigate(-1);
             return;
         }
-
         // 컴포넌트 마운트 시 자동으로 매칭 시작
         if (!hasStartedRef.current && userInfo) {
             hasStartedRef.current = true;

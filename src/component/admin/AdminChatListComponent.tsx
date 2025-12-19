@@ -102,14 +102,10 @@ const AdminChatListComponent = () => {
         }
     };
 
-    if (loading) {
-        return (
-            <Loading />
-        );
-    }
 
     return (
         <>
+        {loading && <Loading />}
             <div className="chat-list-container">
                 <div className="chat-list-header">
                     <div className="header-content">

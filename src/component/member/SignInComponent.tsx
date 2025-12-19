@@ -2,7 +2,9 @@ import { useState } from "react";
 import { signInData } from "..";
 import { useNavigate } from "react-router-dom";
 import { signIn, validateAndGetUserInfo } from "../../api/MemberApi";
+import { connect } from "../../api/ChatApi";
 import "../../css/SignIn.css";
+import Loading from "../common/Loading";
 
 const SignInComponent = () => {
     const [userData, setUserData] = useState<signInData>({
@@ -12,7 +14,7 @@ const SignInComponent = () => {
 
     const [error, setError] = useState<{ [key: string]: string }>({});
     const navigate = useNavigate();
-    
+    const [loading,setLoading] = useState(false);
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -35,28 +37,38 @@ const SignInComponent = () => {
             return;
         }
 
-        signIn(userData)
-            .then(async (res) => {
-                alert(res.data.message);
-                sessionStorage.setItem("expiresIn", res.data.expiresIn);
-                try {
-                    const info = await validateAndGetUserInfo();
-                    const userInfo = info.data.userInfo;
-                    sessionStorage.setItem("userInfo", JSON.stringify(userInfo));
-                    localStorage.setItem("logined", userInfo.memId);
-                } catch (e: any) {
-                    alert(e.data);
-                }
+        setLoading(true);
+      signIn(userData)
+    .then(async (res) => {
+        alert(res.data.message);
+        sessionStorage.setItem("expiresIn", res.data.expiresIn);
+        
+        try {
+            const info = await validateAndGetUserInfo();
+            const userInfo = info.data.userInfo;
+            sessionStorage.setItem("userInfo", JSON.stringify(userInfo));
+            localStorage.setItem("logined", userInfo.memId);
+            connect(() => {
                 navigate("/");
-            })
-            .catch((err) => {
-                alert(err.response.data);
+                setLoading(false);
             });
+        } catch (e: any) {
+            alert(e.data);
+            setLoading(false);
+        }
+    })
+    .catch((err) => {
+        alert(err.response.data);
+        setLoading(false);
+    });
 
         setError({});
     };
 
+
     return (
+        <>
+          {loading && <Loading />}
         <div className="signin-container">
             <div className="signin-box">
                 <h2>로그인</h2>
@@ -101,6 +113,7 @@ const SignInComponent = () => {
                 </form>
             </div>
         </div>
+        </>
     );
 };
 

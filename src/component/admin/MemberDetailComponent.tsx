@@ -32,15 +32,14 @@ const MemberDetailComponent = ({ memberId }: { memberId: string }) => {
       });
   }, []);
 
-  if (loading) {
-    <Loading/>
-  }
 
   if (error) return <div className="error-text">{error}</div>;
   if (!member) return <div className="error-text">회원 정보를 찾을 수 없습니다.</div>;
 
 
   return (
+    <>
+    {loading && <Loading />}
     <div className="main-container">
       <div className="main-content">
         <h2 className="main-title">👤 회원 상세 정보</h2>
@@ -90,6 +89,7 @@ const MemberDetailComponent = ({ memberId }: { memberId: string }) => {
         </table>
       </div>
     </div>
+    </>
   );
 };
 

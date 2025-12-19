@@ -1,22 +1,24 @@
-import {lazy,Suspense} from "react";
-const ChatRoomPage =lazy(()=>import("../pages/chat/ChatRoomPage"));
-const ChatListPage =lazy(()=>import("../pages/chat/ChatListPage"));
-const ChatMatchingPage =lazy(()=>import("../pages/chat/ChatMatchingPage"));
-const Loading=lazy(()=>import("../component/common/Loading"));
+import { lazy } from "react";
+
+const ChatRoomPage = lazy(() => import("../pages/chat/ChatRoomPage"));
+const ChatListPage = lazy(() => import("../pages/chat/ChatListPage"));
+const ChatMatchingPage = lazy(() => import("../pages/chat/ChatMatchingPage"));
+
 const ChatRouter = () => {
-   return [
-        {
-            path:"room/:roomId/:receiver",
-            element:<Suspense fallback={<Loading />}><ChatRoomPage/></Suspense>
-        },
-        {
-            path:"list",
-            element:<Suspense fallback={<Loading />}><ChatListPage/></Suspense>
-        },
-        {
-            path:"matching",
-            element:<Suspense fallback={<Loading />}><ChatMatchingPage/></Suspense>
-        }
-    ]
-}
+  return [
+    {
+      path: "room/:roomId/:receiver",
+      element: <ChatRoomPage />
+    },
+    {
+      path: "list",
+      element: <ChatListPage />
+    },
+    {
+      path: "matching",
+      element: <ChatMatchingPage />
+    }
+  ];
+};
+
 export default ChatRouter;

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { userInfo } from "..";
 import { signUp } from "../../api/MemberApi";
 import { useNavigate } from "react-router-dom";
-import "../../css/SignUp.css";
+import Loading from "../common/Loading";
 
 const SignUpComponent = () => {
   const [userData, setUserData] = useState<userInfo>({
@@ -18,7 +18,7 @@ const SignUpComponent = () => {
   const [error, setError] = useState<{ [key: string]: string }>({});
   const [checkPwd, setCheckPwd] = useState<string>("");
   const navigate = useNavigate();
-
+  const [loading,setLoading] = useState(false);
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (name === "checkPwd") {
@@ -75,18 +75,22 @@ const SignUpComponent = () => {
     }
 
     setError({});
+     setLoading(true);
     signUp(userData)
       .then((res) => {
         alert(res.data);
+          setLoading(false);
         navigate("../signIn");
       })
       .catch((err) => {
-        console.log(err.response.data);
+          setLoading(false);
         alert(err.response.data);
       });
   };
 
   return (
+    <>
+    {loading && <Loading />}
     <div className="signup-container">
       <div className="signup-box">
         <h2>회원가입</h2>
@@ -226,6 +230,7 @@ const SignUpComponent = () => {
         </form>
       </div>
     </div>
+    </>
   );
 };
 

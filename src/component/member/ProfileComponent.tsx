@@ -91,14 +91,13 @@ const ProfileComponent = () => {
     }
   };
 
-  if (loading) {
-    <Loading/>
-  }
 
   if (error) return <div className="error-text">{error}</div>;
   if (!userInfo) return <div className="error-text">회원 정보를 찾을 수 없습니다.</div>;
 
   return (
+    <>
+    {loading && <Loading />}
     <div className="main-container">
       <div className="main-content profile-content">
       <h2 className="main-title">👤 내 프로필</h2>
@@ -287,6 +286,7 @@ const ProfileComponent = () => {
         )}
       </div>
     </div>
+    </>
   ); 
 };
       
