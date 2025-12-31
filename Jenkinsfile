@@ -1,8 +1,8 @@
 pipeline {
     agent any
 
-   triggers {
-        githubPush()  // GitHub push 이벤트 시 자동 빌드
+    triggers {
+        githubPush()
     }
 
     environment {
@@ -17,19 +17,20 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
-               when {
-                branch 'main' 
+            when {
+                branch 'main'
             }
             steps {
                 checkout scm
             }
         }
 
-        when {
+        stage('Build (Docker)') {
+            when {
                 branch 'main'
             }
-        stage('Build (Docker)') {
             steps {
                 sh """
                     docker build \
@@ -43,10 +44,10 @@ pipeline {
             }
         }
 
-        when {
+        stage('Deploy to S3') {
+            when {
                 branch 'main'
             }
-        stage('Deploy to S3') {
             steps {
                 sh """
                     aws s3 sync ./build s3://${S3_BUCKET} --delete \
@@ -58,10 +59,10 @@ pipeline {
             }
         }
 
-     when {
+        stage('Invalidate CloudFront') {
+            when {
                 branch 'main'
             }
-        stage('Invalidate CloudFront') {
             steps {
                 sh """
                     aws cloudfront create-invalidation \
