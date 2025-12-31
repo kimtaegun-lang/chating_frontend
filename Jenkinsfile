@@ -19,18 +19,12 @@ pipeline {
     stages {
 
         stage('Checkout') {
-            when {
-                branch 'main'
-            }
             steps {
                 checkout scm
             }
         }
 
         stage('Build (Docker)') {
-            when {
-                branch 'main'
-            }
             steps {
                 sh """
                     docker build \
@@ -45,9 +39,6 @@ pipeline {
         }
 
         stage('Deploy to S3') {
-            when {
-                branch 'main'
-            }
             steps {
                 sh """
                     aws s3 sync ./build s3://${S3_BUCKET} --delete \
@@ -60,9 +51,6 @@ pipeline {
         }
 
         stage('Invalidate CloudFront') {
-            when {
-                branch 'main'
-            }
             steps {
                 sh """
                     aws cloudfront create-invalidation \
