@@ -1,10 +1,6 @@
 pipeline {
     agent any
     
-    tools {
-        nodejs 'NodeJS 18'
-    }
-    
     environment {
         AWS_REGION = 'eu-north-1'
         S3_BUCKET = 'chat-frontend-tycoon'
