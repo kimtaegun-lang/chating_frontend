@@ -6,7 +6,7 @@ import { chatRoom } from '..';
 import PageComponent from '../common/PageComponent';
 import Loading from '../common/Loading';
 import '../../css/ChatList.css';
-
+//
 const AdminChatListComponent = () => {
     const [chatRooms, setChatRooms] = useState<chatRoom[]>([]);
     const [loading, setLoading] = useState(true);
