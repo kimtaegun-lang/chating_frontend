@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+   triggers {
+        githubPush()  // GitHub push 이벤트 시 자동 빌드
+    }
+
     environment {
         AWS_REGION = 'eu-north-1'
         S3_BUCKET = 'chat-frontend-tycoon'
@@ -14,11 +18,17 @@ pipeline {
 
     stages {
         stage('Checkout') {
+               when {
+                branch 'main' 
+            }
             steps {
                 checkout scm
             }
         }
 
+        when {
+                branch 'main'
+            }
         stage('Build (Docker)') {
             steps {
                 sh """
@@ -33,6 +43,9 @@ pipeline {
             }
         }
 
+        when {
+                branch 'main'
+            }
         stage('Deploy to S3') {
             steps {
                 sh """
@@ -45,6 +58,9 @@ pipeline {
             }
         }
 
+     when {
+                branch 'main'
+            }
         stage('Invalidate CloudFront') {
             steps {
                 sh """
